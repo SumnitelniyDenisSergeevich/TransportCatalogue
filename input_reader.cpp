@@ -1,43 +1,38 @@
 #include "input_reader.h"
 
-
 #include <string_view>
-#include <iomanip>
 #include <tuple>
+#include <iostream>
 
 using namespace std;
 
 void FillCatalog(istream& is, TransportCatalogue& tc) {
+    string vvod_count_s;
     int vvod_count;
+    vector<string> bus_query_s;
 
-    std::deque<Bus> bus_query;
-    std::deque<BusStop> busstop_query;
-
-    cin >> vvod_count;
+    is >> vvod_count_s;
+    vvod_count = stoi(vvod_count_s);
     for (int i = 0; i < vvod_count; ++i) {
         string key;
         is >> key;
         if (key == "Stop"s) {
             getline(is, key);
-            string_view query = key;
-            auto busstop_coord = StopKey(query);
-            busstop_query.push_back({busstop_coord.first, busstop_coord.second});
-            //tc.AddBusStop(busstop_coord.first, busstop_coord.second);
+            auto busstop_coord = StopKey(key.substr(1));
+            tc.AddBusStop(busstop_coord.first, busstop_coord.second);
         }
         else if (key == "Bus"s) {
             getline(is, key);
-            string_view query = key;
-            auto [name, stops, circle_key] = BusKey(query);
-            bus_query.push_back({ name,circle_key,stops });
-            //tc.AddRoute(get<0>(bus_stops), get<1>(bus_stops), get<2>(bus_stops));
+            bus_query_s.push_back(key.substr(1));
         }
     }
-
-    // тут deque  очередей! 
+    for (auto& bus_str : bus_query_s) {
+        auto [name, stops, circle_key] = BusKey(bus_str);
+        tc.AddRoute(name, stops, circle_key);
+    };
 }
 
 std::pair<std::string, Coordinates> StopKey(std::string_view query) {
-    query.remove_prefix(1);
     auto iter = query.find(':');
     string busstop = static_cast<string>(query.substr(0, iter));
     query.remove_prefix(iter + 2);
@@ -53,30 +48,29 @@ std::pair<std::string, Coordinates> StopKey(std::string_view query) {
 std::tuple<string, vector<string>, bool > BusKey(std::string_view query) {
     vector<string> unic_stops;
     bool circle_key = true;
-    query.remove_prefix(1);
     auto iter = query.find(':');
     string bus = static_cast<string>(query.substr(0, iter));
-    query.remove_prefix(iter+1);\
-    iter = query.find('-');
+    query.remove_prefix(iter + 1); \
+        iter = query.find('-');
     if (iter != query.npos) {
-        unic_stops = UnicStops(query, iter);
         circle_key = false;
+        unic_stops = UnicStops(query, circle_key);
     }
     else {
-        iter = query.find('>');
-        unic_stops = UnicStops(query, iter);
+        unic_stops = UnicStops(query, circle_key);
         unic_stops.pop_back();
     }
     return { bus,unic_stops, circle_key };
 }
 
-std::vector<std::string> UnicStops(std::string_view query,size_t iter) {
+std::vector<std::string> UnicStops(std::string_view query, bool circle_flag) {
     vector<string> unic_stops;
+    auto iter = (circle_flag ? query.find('>') : query.find('-'));
     while (iter != query.npos) {
         auto station = query.substr(1, iter);
         station.remove_suffix(2);
         query.remove_prefix(iter + 1);
-        iter = query.find('>');
+        iter = circle_flag ? query.find('>') : query.find('-');
         unic_stops.push_back(static_cast<string>(station));
     }
     query.remove_prefix(1);

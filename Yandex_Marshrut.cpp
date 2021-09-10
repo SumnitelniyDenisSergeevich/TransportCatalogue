@@ -1,14 +1,12 @@
-﻿#include "trasport_catalogue.h"
+﻿#include "transport_catalogue.h"
 #include "input_reader.h"
-
-#include <iostream>
-
-using namespace std;
+#include "stat_reader.h"
 
 int main()
 {
     TransportCatalogue ob1;
-    FillCatalog(cin, ob1);
+    FillCatalog(std::cin, ob1);
+    ProcessingRequests(std::cout, ob1);
    
     system("pause");
 }
