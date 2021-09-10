@@ -15,10 +15,17 @@ void TransportCatalogue::AddRoute(string& bus, vector<string>& stops, bool circl
 		}
 	}
 	buses_.push_back(move(add_bus));
+	for (auto& stop : stops) {
+		for (auto& busstop : busstops_) {
+			if (busstop.name == stop) {
+				busstop.buses.insert(buses_.back().name);
+			}
+		}
+	}
 	busname_to_bus_[buses_.back().name] = &buses_.back();
 }
 void TransportCatalogue::AddBusStop(string& bus_stop, Coordinates& bus_coordinates){
-	busstops_.push_back({ move(bus_stop),move(bus_coordinates) });
+	busstops_.push_back({ move(bus_stop),move(bus_coordinates),{} });
 	stopname_to_stop_[busstops_.back().name] = &busstops_.back();
 }
 
@@ -55,4 +62,8 @@ RoutInfoS TransportCatalogue::RouteInfo(string& bus_f) const {
 	}
 	routinfo.route_length = route_length;
 	return routinfo;
+}
+
+std::set<string_view> TransportCatalogue::BusStopInfo(std::string& busstop) const {
+	return stopname_to_stop_.at(busstop)->buses;
 }

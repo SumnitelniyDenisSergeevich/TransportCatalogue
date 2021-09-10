@@ -6,10 +6,12 @@
 #include <string>
 #include <vector>
 #include <deque>
+#include <set>
 
 struct BusStop {
 	std::string name;
 	Coordinates coordinates;
+	std::set<std::string_view> buses;
 };
 struct Bus {
 	std::string name;
@@ -32,6 +34,7 @@ public:
 	const BusStop* FindBusStop(std::string& busstop) const;
 
 	RoutInfoS RouteInfo(std::string& bus_f) const;
+	std::set<std::string_view> BusStopInfo(std::string& busstop) const;
 private:
 	std::deque<Bus> buses_;
 	std::deque<BusStop> busstops_;

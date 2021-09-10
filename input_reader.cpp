@@ -7,12 +7,10 @@
 using namespace std;
 
 void FillCatalog(istream& is, TransportCatalogue& tc) {
-    string vvod_count_s;
     int vvod_count;
     vector<string> bus_query_s;
 
-    is >> vvod_count_s;
-    vvod_count = stoi(vvod_count_s);
+    is >> vvod_count;
     for (int i = 0; i < vvod_count; ++i) {
         string key;
         is >> key;
@@ -29,7 +27,7 @@ void FillCatalog(istream& is, TransportCatalogue& tc) {
     for (auto& bus_str : bus_query_s) {
         auto [name, stops, circle_key] = BusKey(bus_str);
         tc.AddRoute(name, stops, circle_key);
-    };
+    }
 }
 
 std::pair<std::string, Coordinates> StopKey(std::string_view query) {
