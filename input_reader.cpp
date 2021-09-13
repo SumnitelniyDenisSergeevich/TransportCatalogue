@@ -7,19 +7,18 @@
 using namespace std;
 
 void FillCatalog(istream& is, TransportCatalogue& tc) {
-    string vvod_count_s;
     int vvod_count;
     vector<string> bus_query_s;
+    vector<StopFindResult> busstop_coord_stopdists;
 
-    is >> vvod_count_s;
-    vvod_count = stoi(vvod_count_s);
+    is >> vvod_count;
     for (int i = 0; i < vvod_count; ++i) {
         string key;
         is >> key;
         if (key == "Stop"s) {
             getline(is, key);
-            auto busstop_coord = StopKey(key.substr(1));
-            tc.AddBusStop(busstop_coord.first, busstop_coord.second);
+            busstop_coord_stopdists.push_back(StopKey(key.substr(1)));
+            tc.AddBusStop(busstop_coord_stopdists.back().name, busstop_coord_stopdists.back().coord);
         }
         else if (key == "Bus"s) {
             getline(is, key);
@@ -29,20 +28,52 @@ void FillCatalog(istream& is, TransportCatalogue& tc) {
     for (auto& bus_str : bus_query_s) {
         auto [name, stops, circle_key] = BusKey(bus_str);
         tc.AddRoute(name, stops, circle_key);
-    };
+    }
+
+    for (auto& busstop_coord_stopdist : busstop_coord_stopdists) {
+        for (auto& stopdist : busstop_coord_stopdist.otherstop_dist) {
+            auto temp = tc.FindBusStop(stopdist.first);
+            tc.SetDistanceBetweenStops(busstop_coord_stopdist.name, temp->name , stopdist.second);
+        }
+    }
 }
 
-std::pair<std::string, Coordinates> StopKey(std::string_view query) {
+StopFindResult StopKey(std::string_view query) {
+    StopFindResult result;
     auto iter = query.find(':');
-    string busstop = static_cast<string>(query.substr(0, iter));
+    result.name = static_cast<string>(query.substr(0, iter));
     query.remove_prefix(iter + 2);
     iter = query.find(',');
-    string coord = static_cast<string>(query.substr(0, iter));
-    double coord_first = stod(move(coord));
+    string str;
+    result.coord.lat = stod(static_cast<string>(query.substr(0, iter)));
     query.remove_prefix(iter + 2);
-    coord = static_cast<string>(query);
-    double coord_second = stod(move(coord));
-    return { busstop,{coord_first,coord_second} };
+
+    if (iter = query.find(','); iter != query.npos) {
+        result.coord.lng = stod(static_cast<string>(query.substr(0, iter)));
+        query.remove_prefix(iter + 2);
+
+        iter = query.find(',');
+
+        while (iter != query.npos) {
+            iter = query.find('m');
+            uint32_t dist = stoi(static_cast<string>(query.substr(0, iter)));
+            query.remove_prefix(iter + 5);
+            iter = query.find(',');
+            result.otherstop_dist[static_cast<string>(query.substr(0, iter))] = dist;
+            query.remove_prefix(iter + 2);
+            iter = query.find(',');
+        }
+
+        iter = query.find('m');
+        uint32_t dist = stoi(static_cast<string>(query.substr(0, iter)));
+        query.remove_prefix(iter + 5);
+        result.otherstop_dist[static_cast<string>(query)] = dist;
+    }
+    else {
+        result.coord.lng = stod(static_cast<string>(query));
+    }
+
+    return result;
 }
 
 std::tuple<string, vector<string>, bool > BusKey(std::string_view query) {

@@ -7,6 +7,6 @@ int main()
     TransportCatalogue ob1;
     FillCatalog(std::cin, ob1);
     ProcessingRequests(std::cout, ob1);
-   
+    
     system("pause");
 }
