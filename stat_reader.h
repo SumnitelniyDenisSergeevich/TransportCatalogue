@@ -3,4 +3,8 @@
 
 #include <iostream>
 
-void ProcessingRequests(std::ostream&, TransportCatalogue&);
+namespace Transport_Catalogue {
+namespace Transport_Catalogue_Output {
+	void ProcessingRequests(std::ostream&, TransportCatalogue&);
+}
+}
