@@ -8,8 +8,9 @@ namespace Transport_Catalogue {
 namespace Transport_Catalogue_Input {
 	void FillCatalog(std::istream& is, TransportCatalogue& tc);
 namespace detail {
-	Transport_Catalogue::detail::StopFindResult FillStop(std::string_view query);
-	std::tuple<std::string, std::vector<std::string>, bool > FillRoute(std::string_view query);
+	using DistFromToStr = std::unordered_map<std::string, std::unordered_map<std::string, uint32_t>>;
+	Stop FillStop(std::string_view query, DistFromToStr& from_to_dist);
+	std::pair<Bus, std::vector<std::string>> FillRoute(std::string_view query, TransportCatalogue& tc);
 	std::vector<std::string> FillUnicStops(std::string_view query, bool);
 }
 }

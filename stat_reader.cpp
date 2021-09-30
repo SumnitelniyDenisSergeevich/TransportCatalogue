@@ -43,6 +43,7 @@ void PrintStop(istream& in, ostream& out, TransportCatalogue& tc) {
 	}
 }
 void PrintRoute(istream& in, ostream& out, TransportCatalogue& tc) {
+	//tc.Print();
 	string bus;
 	getline(in, bus);
 	bus = bus.substr(1);

@@ -8,10 +8,13 @@ using namespace std;
 
 namespace Transport_Catalogue {
 namespace Transport_Catalogue_Input {
+    //using DistFromToStr = unordered_map<string, unordered_map<string, uint32_t>>;
 void FillCatalog(istream& is, TransportCatalogue& tc) {
     int counter;
     vector<string> bus_query_s;
-    vector<Transport_Catalogue::detail::StopFindResult> stops;
+    vector<Transport_Catalogue::Stop> stops;
+
+    detail::DistFromToStr from_to_dist;
 
     is >> counter;
     for (int i = 0; i < counter; ++i) {
@@ -19,39 +22,38 @@ void FillCatalog(istream& is, TransportCatalogue& tc) {
         is >> key;
         getline(is, bus_stop);
         if (key == "Stop"s) {
-            Transport_Catalogue::detail::StopFindResult stop = detail::FillStop(bus_stop.substr(1));
+            Transport_Catalogue::Stop stop = detail::FillStop(bus_stop.substr(1), from_to_dist);
             stops.push_back(stop);
-            tc.AddStop(stop.name, stop.coord);
+            tc.AddStop(stop);
         }
         else if (key == "Bus"s) {
             bus_query_s.push_back(bus_stop.substr(1));
         }
     }
     for (auto& bus_str : bus_query_s) {
-        auto [name, stops, circle_key] = detail::FillRoute(bus_str);
-        tc.AddRoute(name, stops, circle_key);
+        auto [bus, stops] = detail::FillRoute(bus_str, tc);
+        tc.AddRoute(bus,stops);
     }
-
-    for (auto& busstop_coord_stopdist : stops) {
-        for (auto& stopdist : busstop_coord_stopdist.otherstop_dist) {
-            auto temp = tc.FindStop(stopdist.first);
-            tc.SetDistanceBetweenStops(busstop_coord_stopdist.name, temp->name, stopdist.second);
+    // distance в from_to_dist
+    for (auto& [from, to_dist] : from_to_dist) {
+        for (auto& [to, dist] : to_dist) {
+            tc.SetDistanceBetweenStops(tc.FindStop(from), tc.FindStop(to), dist);
         }
     }
 }
 namespace detail {
-Transport_Catalogue::detail::StopFindResult FillStop(string_view query) {
-    Transport_Catalogue::detail::StopFindResult result;
+Transport_Catalogue::Stop FillStop(string_view query, DistFromToStr& from_to_dist) {
+    Transport_Catalogue::Stop result;
     size_t iter = query.find(':');
     result.name = static_cast<string>(query.substr(0, iter));
     query.remove_prefix(iter + 2);
     iter = query.find(',');
     string str;
-    result.coord.lat = stod(static_cast<string>(query.substr(0, iter)));
+    result.coordinates.lat = stod(static_cast<string>(query.substr(0, iter)));
     query.remove_prefix(iter + 2);
 
     if (iter = query.find(','); iter != query.npos) {
-        result.coord.lng = stod(static_cast<string>(query.substr(0, iter)));
+        result.coordinates.lng = stod(static_cast<string>(query.substr(0, iter)));
         query.remove_prefix(iter + 2);
 
         iter = query.find(',');
@@ -61,7 +63,7 @@ Transport_Catalogue::detail::StopFindResult FillStop(string_view query) {
             uint32_t dist = stoi(static_cast<string>(query.substr(0, iter)));
             query.remove_prefix(iter + 5);
             iter = query.find(',');
-            result.otherstop_dist[static_cast<string>(query.substr(0, iter))] = dist;
+            from_to_dist[result.name][static_cast<string>(query.substr(0, iter))] = dist;
             query.remove_prefix(iter + 2);
             iter = query.find(',');
         }
@@ -69,20 +71,22 @@ Transport_Catalogue::detail::StopFindResult FillStop(string_view query) {
         iter = query.find('m');
         uint32_t dist = stoi(static_cast<string>(query.substr(0, iter)));
         query.remove_prefix(iter + 5);
-        result.otherstop_dist[static_cast<string>(query)] = dist;
+        iter = query.find(',');
+        from_to_dist[result.name][static_cast<string>(query.substr(0, iter))] = dist;
     }
     else {
-        result.coord.lng = stod(static_cast<string>(query));
+        result.coordinates.lng = stod(static_cast<string>(query));
     }
     return result;
 }
 
-tuple<string, vector<string>, bool > FillRoute(string_view query) {
+std::pair<Bus,std::vector<std::string>> FillRoute(string_view query,TransportCatalogue& tc) {
+    Bus result;
     vector<string> unic_stops;
     bool circle_key = true;
     size_t iter = query.find(':');
-    string bus = static_cast<string>(query.substr(0, iter));
-    query.remove_prefix(iter + 1); \
+    result.name = static_cast<string>(query.substr(0, iter));
+    query.remove_prefix(iter + 1); 
         iter = query.find('-');
     if (iter != query.npos) {
         circle_key = false;
@@ -92,7 +96,15 @@ tuple<string, vector<string>, bool > FillRoute(string_view query) {
         unic_stops = FillUnicStops(query, circle_key);
         unic_stops.pop_back();
     }
-    return { bus,unic_stops, circle_key };
+    result.circle_key = circle_key;
+
+    for (auto& stop_str : unic_stops) {
+        if (const Stop* stop = tc.FindStop(stop_str); stop) {
+            result.bus_stops.push_back(stop);
+        }
+    }
+
+    return { result, unic_stops };
 }
 
 vector<string> FillUnicStops(string_view query, bool circle_flag) {
