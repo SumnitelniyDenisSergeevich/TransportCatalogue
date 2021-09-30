@@ -6,35 +6,53 @@
 #include <string>
 #include <vector>
 #include <deque>
+#include <set>
 
-struct BusStop {
+namespace Transport_Catalogue {
+namespace detail {
+struct StopFindResult {
+	std::string name;
+	Coordinates	coord;
+	std::unordered_map<std::string, uint32_t> otherstop_dist;
+};
+}// namespace detail
+struct Stop {
 	std::string name;
 	Coordinates coordinates;
+	std::set<std::string_view> buses;
+	std::unordered_map<std::string_view, uint32_t> otherstop_dist;
 };
 struct Bus {
 	std::string name;
 	bool circle_key;
-	std::vector<BusStop*> bus_stops;
-	std::unordered_set<BusStop*> unic_bus_stops_;
+	std::vector<Stop*> bus_stops;
 };
 struct RoutInfoS {
 	size_t rout_stops_count;
 	size_t unic_rout_stop_count;
 	double route_length;
+	double curvature;
 };
 
 class TransportCatalogue {
 public:
-	void AddRoute(std::string&, std::vector<std::string>&, bool);
-	void AddBusStop(std::string& bus_stop, Coordinates& bus_coordinates);
+	void AddRoute(std::string& bus_name, const std::vector<std::string>& stops, bool circle_key);
+	void AddStop(const std::string& stop_name, Coordinates& stop_coord);
 
-	const Bus* FindRoute(std::string& bus_f) const;
-	const BusStop* FindBusStop(std::string& busstop) const;
+	const Bus* FindRoute(const std::string& bus_name) const;
+	const Stop* FindStop(const std::string& stop_name) const;
 
-	RoutInfoS RouteInfo(std::string& bus_f) const;
+	RoutInfoS RouteInfo(const std::string& bus_name) const;
+	std::set<std::string_view> StopInfo(const std::string& stop_name) const;
+
+	void SetDistanceBetweenStops(const std::string_view from, const std::string_view to, const uint32_t dist);
+	double GetDistanceBetweenStops(const std::string_view from, const std::string_view to) const;
+
+	size_t Unic_stops_count(const std::string& bus_name)const;
 private:
 	std::deque<Bus> buses_;
-	std::deque<BusStop> busstops_;
+	std::deque<Stop> busstops_;
 	std::unordered_map<std::string_view, const Bus*> busname_to_bus_;
-	std::unordered_map<std::string_view, const BusStop*> stopname_to_stop_;
+	std::unordered_map<std::string_view, const Stop*> stopname_to_stop_;
 };
+}//namespace Transport_Catalogue
