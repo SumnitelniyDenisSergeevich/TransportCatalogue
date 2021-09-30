@@ -9,18 +9,19 @@ using namespace std;
 namespace Transport_Catalogue {
 namespace Transport_Catalogue_Input {
 void FillCatalog(istream& is, TransportCatalogue& tc) {
-    int vvod_count;
+    int counter;
     vector<string> bus_query_s;
-    vector<Transport_Catalogue::detail::StopFindResult> busstop_coord_stopdists;
+    vector<Transport_Catalogue::detail::StopFindResult> stops;
 
-    is >> vvod_count;
-    for (int i = 0; i < vvod_count; ++i) {
+    is >> counter;
+    for (int i = 0; i < counter; ++i) {
         string key, bus_stop;
         is >> key;
         getline(is, bus_stop);
         if (key == "Stop"s) {
-            busstop_coord_stopdists.push_back(detail::FillStop(bus_stop.substr(1)));
-            tc.AddStop(busstop_coord_stopdists.back().name, busstop_coord_stopdists.back().coord);
+            Transport_Catalogue::detail::StopFindResult stop = detail::FillStop(bus_stop.substr(1));
+            stops.push_back(stop);
+            tc.AddStop(stop.name, stop.coord);
         }
         else if (key == "Bus"s) {
             bus_query_s.push_back(bus_stop.substr(1));
@@ -31,7 +32,7 @@ void FillCatalog(istream& is, TransportCatalogue& tc) {
         tc.AddRoute(name, stops, circle_key);
     }
 
-    for (auto& busstop_coord_stopdist : busstop_coord_stopdists) {
+    for (auto& busstop_coord_stopdist : stops) {
         for (auto& stopdist : busstop_coord_stopdist.otherstop_dist) {
             auto temp = tc.FindStop(stopdist.first);
             tc.SetDistanceBetweenStops(busstop_coord_stopdist.name, temp->name, stopdist.second);
@@ -75,6 +76,7 @@ Transport_Catalogue::detail::StopFindResult FillStop(string_view query) {
     }
     return result;
 }
+
 tuple<string, vector<string>, bool > FillRoute(string_view query) {
     vector<string> unic_stops;
     bool circle_key = true;

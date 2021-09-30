@@ -48,10 +48,10 @@ public:
 	void SetDistanceBetweenStops(const std::string_view from, const std::string_view to, const uint32_t dist);
 	double GetDistanceBetweenStops(const std::string_view from, const std::string_view to) const;
 
-	size_t Unic_stops_count(const std::string& bus_name)const;
+	size_t UnicStopsCount(const std::string& bus_name) const;
 private:
 	std::deque<Bus> buses_;
-	std::deque<Stop> busstops_;
+	std::deque<Stop> stops_;
 	std::unordered_map<std::string_view, const Bus*> busname_to_bus_;
 	std::unordered_map<std::string_view, const Stop*> stopname_to_stop_;
 };
