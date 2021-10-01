@@ -4,8 +4,8 @@
 
 #include <vector>
 
-namespace Transport_Catalogue {
-namespace Transport_Catalogue_Input {
+namespace transport_catalogue {
+namespace transport_catalogue_input {
 	void FillCatalog(std::istream& is, TransportCatalogue& tc);
 namespace detail {
 	using DistFromToStr = std::unordered_map<std::string, std::unordered_map<std::string, uint32_t>>;

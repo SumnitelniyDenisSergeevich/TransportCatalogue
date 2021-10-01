@@ -3,9 +3,9 @@
 #include <iomanip>
 
 using namespace std;
-namespace Transport_Catalogue {
-namespace Transport_Catalogue_Output {
-void ProcessingRequests(istream& in,ostream& out, TransportCatalogue& tc) {
+namespace transport_catalogue {
+namespace transport_catalogue_output {
+void ProcessingRequests(istream& in,ostream& out, const TransportCatalogue& tc) {
 	int requests_number;
 	in >> requests_number;
 	for (int i = 0; i < requests_number; ++i) {
@@ -20,7 +20,7 @@ void ProcessingRequests(istream& in,ostream& out, TransportCatalogue& tc) {
 	}
 }
 namespace detail {
-void PrintStop(istream& in, ostream& out, TransportCatalogue& tc) {
+void PrintStop(istream& in, ostream& out, const TransportCatalogue& tc) {
 	string bus_stop;
 	getline(in, bus_stop);
 	bus_stop = bus_stop.substr(1);
@@ -29,21 +29,20 @@ void PrintStop(istream& in, ostream& out, TransportCatalogue& tc) {
 		out << "Stop "s << bus_stop << ": not found"s << '\n';
 	}
 	else {
-		auto busstops = tc.StopInfo(bus_stop);
+		auto busstops = tc.StopInfo(tc.FindStop(bus_stop));
 		if (!busstops.size()) {
 			out << "Stop "s << bus_stop << ": no buses"s << '\n';
 		}
 		else {
 			out << "Stop "s << bus_stop << ": buses"s;
-			for (auto stop : tc.StopInfo(bus_stop)) {
+			for (auto& stop : tc.StopInfo(tc.FindStop(bus_stop))) {
 				out << ' ' << stop;
 			}
 			out << '\n';
 		}
 	}
 }
-void PrintRoute(istream& in, ostream& out, TransportCatalogue& tc) {
-	//tc.Print();
+void PrintRoute(istream& in, ostream& out, const TransportCatalogue& tc) {
 	string bus;
 	getline(in, bus);
 	bus = bus.substr(1);
@@ -59,5 +58,5 @@ void PrintRoute(istream& in, ostream& out, TransportCatalogue& tc) {
 }
 }//namespace detail
 
-}//namespace Transport_Catalogue_Output
-}//namespace Transport_Catalogue
+}//namespace transport_catalogue_output
+}//namespace transport_catalogue

@@ -3,12 +3,12 @@
 
 #include <iostream>
 
-namespace Transport_Catalogue {
-namespace Transport_Catalogue_Output {
-	void ProcessingRequests(std::istream&, std::ostream&, TransportCatalogue&);
+namespace transport_catalogue {
+namespace transport_catalogue_output {
+	void ProcessingRequests(std::istream&, std::ostream&, const TransportCatalogue&);
 namespace detail {
-	void PrintStop(std::istream& in, std::ostream& out, TransportCatalogue& tc);
-	void PrintRoute(std::istream& in, std::ostream& out, TransportCatalogue& tc);
+	void PrintStop(std::istream& in, std::ostream& out, const TransportCatalogue& tc);
+	void PrintRoute(std::istream& in, std::ostream& out, const TransportCatalogue& tc);
 }
 }
 }

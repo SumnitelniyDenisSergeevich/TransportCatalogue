@@ -6,13 +6,11 @@
 
 using namespace std;
 
-namespace Transport_Catalogue {
-namespace Transport_Catalogue_Input {
-    //using DistFromToStr = unordered_map<string, unordered_map<string, uint32_t>>;
+namespace transport_catalogue {
+namespace transport_catalogue_input {
 void FillCatalog(istream& is, TransportCatalogue& tc) {
-    int counter;
+    int counter = 0;
     vector<string> bus_query_s;
-    vector<Transport_Catalogue::Stop> stops;
 
     detail::DistFromToStr from_to_dist;
 
@@ -22,9 +20,7 @@ void FillCatalog(istream& is, TransportCatalogue& tc) {
         is >> key;
         getline(is, bus_stop);
         if (key == "Stop"s) {
-            Transport_Catalogue::Stop stop = detail::FillStop(bus_stop.substr(1), from_to_dist);
-            stops.push_back(stop);
-            tc.AddStop(stop);
+            tc.AddStop(detail::FillStop(bus_stop.substr(1), from_to_dist));
         }
         else if (key == "Bus"s) {
             bus_query_s.push_back(bus_stop.substr(1));
@@ -32,9 +28,8 @@ void FillCatalog(istream& is, TransportCatalogue& tc) {
     }
     for (auto& bus_str : bus_query_s) {
         auto [bus, stops] = detail::FillRoute(bus_str, tc);
-        tc.AddRoute(bus,stops);
+        tc.AddRoute(bus, stops);
     }
-    // distance в from_to_dist
     for (auto& [from, to_dist] : from_to_dist) {
         for (auto& [to, dist] : to_dist) {
             tc.SetDistanceBetweenStops(tc.FindStop(from), tc.FindStop(to), dist);
@@ -42,8 +37,8 @@ void FillCatalog(istream& is, TransportCatalogue& tc) {
     }
 }
 namespace detail {
-Transport_Catalogue::Stop FillStop(string_view query, DistFromToStr& from_to_dist) {
-    Transport_Catalogue::Stop result;
+    transport_catalogue::Stop FillStop(string_view query, DistFromToStr& from_to_dist) {
+    transport_catalogue::Stop result;
     size_t iter = query.find(':');
     result.name = static_cast<string>(query.substr(0, iter));
     query.remove_prefix(iter + 2);
