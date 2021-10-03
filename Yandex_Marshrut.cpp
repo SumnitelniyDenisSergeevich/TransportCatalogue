@@ -9,6 +9,6 @@ int main()
     TransportCatalogue ob1;
     ::Transport_Catalogue_Input::FillCatalog(std::cin, ob1);
     ::Transport_Catalogue_Output::ProcessingRequests(std::cin, std::cout, ob1);
-    
+
     system("pause");
 }

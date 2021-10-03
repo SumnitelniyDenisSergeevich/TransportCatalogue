@@ -8,6 +8,9 @@
 struct Coordinates {
     double lat;
     double lng;
+    bool operator==(const Coordinates& other) {
+        return (lat == other.lat && lng == other.lng);
+    }
 };
 
 inline double ComputeDistance(Coordinates from, Coordinates to) {
