@@ -3,11 +3,11 @@
 using namespace std;
 
 namespace transport_catalogue {
-	void TransportCatalogue::AddRoute( Bus& bus, const json::Array stops) {
+	void TransportCatalogue::AddRoute( Bus& bus, const vector<string> stops) {
 		buses_.push_back(move(bus));
 		for (const auto& stop : stops) {
 			for (const auto& busstop : stops_) {
-				if (busstop.name == stop.AsString()) {
+				if (busstop.name == stop) {
 					stop__by_buses_[&busstop].insert(buses_.back().name);
 				}
 			}

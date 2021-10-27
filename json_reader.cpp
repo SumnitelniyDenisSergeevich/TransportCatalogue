@@ -1,6 +1,21 @@
 #include "json_reader.h"
 #include <iostream> // delete
+#include <map>
 using namespace std;
+
+
+JsonReader::JsonReader(std::istream& in) : doc_(json::Load(in)) {
+}
+
+void JsonReader::FillCatalogue(transport_catalogue::TransportCatalogue& tc) {
+    auto iter = doc_.GetRoot().AsMap().at("base_requests"s);
+    transport_catalogue::transport_catalogue_input::FillCatalog(iter, tc);
+}
+
+json::Dict JsonReader::GetRequests() {
+	json::Dict requests = doc_.GetRoot().AsMap();
+	return requests;
+}
 
 namespace transport_catalogue {
     namespace transport_catalogue_input {
@@ -28,20 +43,24 @@ namespace transport_catalogue {
             }
         }
         namespace detail {
-            std::pair<Bus, Array> FillRoute(Node& node_bus, TransportCatalogue& tc) {
+            std::pair<Bus, vector<string>> FillRoute(Node& node_bus, TransportCatalogue& tc) {
                 Bus result;
                 result.name = node_bus.AsMap().at("name"s).AsString();
                 result.circle_key = node_bus.AsMap().at("is_roundtrip"s).AsBool();
                 Array array = node_bus.AsMap().at("stops"s).AsArray();
+				vector<string> array_str;
+				for (auto& stop_str : array) {
+					array_str.push_back(stop_str.AsString());
+				}
                 if (result.circle_key) {
-                    array.pop_back();
+					array_str.pop_back();
                 }
-                for (auto& stop_str : array) {
-                    if (const Stop* stop = tc.FindStop(stop_str.AsString()); stop) {
+                for (auto& stop_str : array_str) {
+                    if (const Stop* stop = tc.FindStop(stop_str); stop) {
                         result.bus_stops.push_back(stop);
                     }
                 }
-                return { result, array };
+                return { result, array_str };
             }
             Stop FillStop(const Node& node_stop, unordered_map<string, Dict>& from_to_dist) {
                 Stop result;
@@ -54,4 +73,6 @@ namespace transport_catalogue {
 
         }// namespace detail
     }// namespace transport_catalogue_input
+
+
 }// namespace transport_catalogue
