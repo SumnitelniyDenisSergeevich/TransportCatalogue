@@ -1,6 +1,8 @@
 #include "json.h"
 #include <unordered_set>
 #include <unordered_map>
+
+#include <iostream> // delete
 using namespace std;
 
 namespace json {
@@ -342,7 +344,7 @@ namespace json {
         ++otstup;
         for (auto node : array) {
             if (b) {
-                out << ", "s << endl;
+                out << ","s << endl;
             }
             for (int i = 0; i < otstup; ++i) {
                 out << "    "s;
@@ -366,7 +368,7 @@ namespace json {
         ++otstup;
         for (auto node : dict) {
             if (b) {
-                out << ", "s << endl;
+                out << ","s << endl;
             }
             for (int i = 0; i < otstup; ++i) {
                 out << "    "s;
@@ -393,7 +395,15 @@ namespace json {
         out << val;
     }
     void NodeValueVisitor::operator()(std::string str) {
-        unordered_set<char> escape_symbols = { '\b' ,'\f','\n','\r','\t','\v','\"' };
+       // unordered_set<char> escape_symbols = { '\b' ,'\f','\n','\r','\t','\v','\"' };
+        unordered_map<char, char> escape_symbols = {
+        {'\b','b'},
+        {'\f','f'},
+        {'\n','n'},
+        {'\r','r'},
+        {'\t','t'},
+        {'\v','v'},
+        {'\"','\"'} };
 
         auto str_iter = str.begin();
         while (str_iter != str.end()) {
@@ -403,14 +413,34 @@ namespace json {
             }
             ++str_iter;
         }
-        str_iter = str.begin();
-        while (str_iter != str.end()) {
+
+        for (std::uint32_t i = 0; i < str.size(); ++i) {
+            if (auto symbol = escape_symbols.find(str[i]); symbol != escape_symbols.end()) {
+                auto iter = str.begin() + i;
+                str.erase(iter);
+                iter = str.begin() + i;
+                str.insert(iter, '\\');
+                ++i;
+                iter = str.begin() + i;
+                str.insert(iter, symbol->second);
+                ++i;
+            }
+        }
+
+       /* while (str_iter != str.end()) {
+            cout << endl << i << endl << str << endl << *str_iter << endl;
+            if (i > 220) {
+                system("pause");
+            }
+
+
+            ++i;
             if (auto symbol = escape_symbols.find(*str_iter); symbol != escape_symbols.end()) {
                 str.insert(str_iter, '\\');
                 ++str_iter;
             }
             ++str_iter;
-        }
+        }*/
         str.insert(str.begin(), '\"');
         str.push_back('\"');
         out << str;
