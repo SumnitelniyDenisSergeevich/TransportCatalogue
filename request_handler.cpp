@@ -119,7 +119,7 @@ json::Node RequestHandler::StatRoute(json::Node& route_node) {
 		result["error_message"s] = json::Node{ "not found"s };
 	}
 	else {
-		transport_catalogue::RoutInfoS rout_info = db_.RouteInfo(route_name);
+		RoutInfoS rout_info = db_.RouteInfo(route_name);
 		result["curvature"s] = json::Node{ rout_info.curvature };
 		result["route_length"s] = json::Node{ rout_info.route_length };
 		result["stop_count"s] = json::Node{ static_cast<int>(rout_info.rout_stops_count) };

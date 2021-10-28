@@ -6,33 +6,15 @@
 #include <set>
 #include <map>
 #include <string>
+#include <vector>
 
 
 namespace transport_catalogue {
-	struct Stop {
-		std::string name;
-		geo::Coordinates coordinates;
-
-		bool operator==(const Stop& other) const {
-			return (this == &other);
-		}
-	};
 	class StopHasher {
 	public:
 		size_t operator()(const Stop* stop) const {
 			return static_cast<size_t>(stop->coordinates.lat * 17 + stop->coordinates.lng * 17 * 17);
 		}
-	};
-	struct Bus {
-		std::string name;
-		bool circle_key;
-		std::vector<const Stop*> bus_stops;
-	};
-	struct RoutInfoS {
-		size_t rout_stops_count;
-		size_t unic_rout_stop_count;
-		double route_length;
-		double curvature;
 	};
 	using DistFromTo = std::unordered_map<const Stop*, std::unordered_map<const Stop*, uint32_t, StopHasher>, StopHasher>;
 	class TransportCatalogue {
