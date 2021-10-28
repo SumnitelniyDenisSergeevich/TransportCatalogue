@@ -18,7 +18,7 @@ public:
 
     json::Node StatRoute(json::Node& route_node);
 
-    svg::Document RenderMap() const;
+    svg::Document RenderMap(const transport_catalogue::TransportCatalogue& db) const;
 private:
     const transport_catalogue::TransportCatalogue& db_;
     renderer::MapRender& renderer_;

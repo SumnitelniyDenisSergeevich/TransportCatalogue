@@ -1,6 +1,7 @@
 #pragma once
 #include "domain.h"
 #include "svg.h"
+#include "transport_catalogue.h"
 
 #include <array>
 
@@ -20,18 +21,7 @@ namespace renderer {
 		void SetUnderLayerWidth(const double underlayer_width) noexcept;
 		void SetColorPalette(const std::vector<svg::Color>& color_palette) noexcept;
 
-		double GetWidth() const noexcept;
-		double GetHeight() const noexcept;
-		double GetPadding() const noexcept;
-		double GetLineWidth() const noexcept;
-		double GetStopRadius() const noexcept;
-		uint32_t GetBusLableFontSize() const noexcept;
-		std::array<double, 2> GetBusLableOffset() const noexcept;
-		uint32_t GetStopLableFontSize() const noexcept;
-		std::array<double, 2> GetStopLableOffset() const noexcept;
-		svg::Color GetUnderLayerColor() const noexcept;
-		double GetUnderLayerWidth() const noexcept;
-		std::vector<svg::Color> GetColorPalette() const noexcept;
+		svg::Document RenderSVG(const transport_catalogue::TransportCatalogue& db_) const;
 	private:
 		double width_;
 		double height_;
@@ -45,5 +35,7 @@ namespace renderer {
 		svg::Color underlayer_color_;
 		double underlayer_width_;  
 		std::vector<svg::Color> color_palette_;
+
+		void DrawText(svg::Text& text, svg::Text& podlojka) const;
 	};
 }//renderer
