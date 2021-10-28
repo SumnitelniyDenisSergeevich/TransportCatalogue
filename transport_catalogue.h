@@ -1,15 +1,12 @@
 #pragma once
-#include "geo.h"
-#include "json.h"
+#include "domain.h"
 
 #include <unordered_map>
-#include <unordered_set>
 #include <deque>
 #include <set>
+#include <map>
+#include <string>
 
-#include <iostream> // delete
-#include <cassert>//delete
-using namespace std; // delete
 
 namespace transport_catalogue {
 	struct Stop {
@@ -40,7 +37,7 @@ namespace transport_catalogue {
 	using DistFromTo = std::unordered_map<const Stop*, std::unordered_map<const Stop*, uint32_t, StopHasher>, StopHasher>;
 	class TransportCatalogue {
 	public:
-		void AddRoute(Bus& bus, const json::Array stops);
+		void AddRoute(Bus& bus, const std::vector<std::string> stops);
 		void AddStop(const Stop& stop);
 
 		const Bus* FindRoute(const std::string& bus_name) const;
@@ -53,11 +50,19 @@ namespace transport_catalogue {
 		double GetDistanceBetweenStops(const Stop* from, const Stop* to) const;
 
 		size_t UnicStopsCount(const std::string& bus_name) const;
+
+		std::map<std::string_view, const Stop*> GetStopNameToStop() const {//question
+			return stopname_to_stop_;
+		}
+
+		std::map<std::string_view, const Bus*> GetBusNameToBus() const {//question
+			return busname_to_bus_;
+		}
 	private:
 		std::deque<Bus> buses_;
 		std::deque<Stop> stops_;
-		std::unordered_map<std::string_view, const Bus*> busname_to_bus_;
-		std::unordered_map<std::string_view, const Stop*> stopname_to_stop_;
+		std::map<std::string_view, const Bus*> busname_to_bus_;
+		std::map<std::string_view, const Stop*> stopname_to_stop_;
 		std::unordered_map<const Stop*, std::set<std::string_view>> stop__by_buses_; 
 		DistFromTo from_to_dist_;
 	};

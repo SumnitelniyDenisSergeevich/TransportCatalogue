@@ -1,5 +1,8 @@
 #include "transport_catalogue.h"
-#include <iostream> // delete
+
+#include <stdexcept>
+#include <unordered_set>
+
 using namespace std;
 
 namespace transport_catalogue {
