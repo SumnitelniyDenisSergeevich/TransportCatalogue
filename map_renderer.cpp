@@ -37,7 +37,7 @@ namespace renderer {
 	void MapRender::SetUnderLayerWidth(const double underlayer_width) noexcept {
 		underlayer_width_ = underlayer_width;
 	}
-	void MapRender::SetColorPalette(const std::vector<svg::Color>& color_palette) noexcept {
+	void MapRender::SetColorPalette(const vector<svg::Color>& color_palette) noexcept {
 		color_palette_ = color_palette;
 	}
 
@@ -224,6 +224,7 @@ namespace renderer {
 
 		return result;
 	}
+
 	void MapRender::DrawText(svg::Text& text, svg::Text& podlojka) const {
 		text.SetOffset({ bus_label_offset_[0],bus_label_offset_[1] }).SetFontSize(bus_label_font_size_);
 		text.SetFontFamily("Verdana"s).SetFontWeight("bold"s);

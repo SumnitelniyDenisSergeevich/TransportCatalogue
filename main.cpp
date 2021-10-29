@@ -14,13 +14,12 @@ int main() {
 
     TransportCatalogue catalogue;
     MapRender map;
-    JsonReader json_reader(in);
-
-    RequestHandler request_handler(catalogue, map, json_reader.GetRequests());
+    RequestHandler request_handler(catalogue, map);
+    JsonReader json_reader(in, request_handler);
 
     json_reader.FillCatalogue(catalogue);
-    request_handler.FillRenderSettings();
-    request_handler.ProcessRequests(out);
+    json_reader.FillRenderSettings(map);
+    json_reader.PrintRequestsAnswer(out);
 
     system("pause");
 }

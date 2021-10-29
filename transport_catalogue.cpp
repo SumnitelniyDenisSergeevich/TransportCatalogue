@@ -64,7 +64,7 @@ namespace transport_catalogue {
 		return rout_info;
 	}
 
-	std::set<string_view> TransportCatalogue::GetStopInfo(const Stop* stop) const {
+	set<string_view> TransportCatalogue::GetStopInfo(const Stop* stop) const {
 		if (stop_by_buses_.count(stop) != 0) {
 			return stop_by_buses_.at(stop);
 		}
@@ -90,7 +90,7 @@ namespace transport_catalogue {
 	}
 
 	size_t TransportCatalogue::UnicStopsCount(const string& bus_name) const {
-		std::unordered_set<string_view> unic_bus_stops;
+		unordered_set<string_view> unic_bus_stops;
 		for (const auto& bus_stop : busname_to_bus_.at(bus_name)->bus_stops) {
 			unic_bus_stops.insert(bus_stop->name);
 		}

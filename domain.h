@@ -12,12 +12,14 @@ struct Stop {
 		return (this == &other);
 	}
 };
+
 struct RouteInfo {
 	size_t rout_stops_count;
 	size_t unic_rout_stop_count;
 	double route_length;
 	double curvature;
 };
+
 struct Bus {
 	std::string name;
 	bool circle_key;
