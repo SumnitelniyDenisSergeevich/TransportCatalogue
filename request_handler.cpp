@@ -66,10 +66,10 @@ void RequestHandler::ProcessRequests(std::ostream& out) {
 	for (auto stat_request : stat_requests) {
 		auto map_iter = stat_request.AsMap().find("type"s);
 		if (map_iter->second.AsString() == "Stop"s) {
-			out_data.push_back(StatStop(stat_request));
+			out_data.push_back(GetStatStop(stat_request));
 		}
 		if (map_iter->second.AsString() == "Bus"s) {
-			out_data.push_back(StatRoute(stat_request));
+			out_data.push_back(GetStatRoute(stat_request));
 		}
 		if (map_iter->second.AsString() == "Map"s) {
 			json::Dict result;
@@ -84,7 +84,7 @@ void RequestHandler::ProcessRequests(std::ostream& out) {
 	json::Print(json::Document{ json::Node{out_data} }, out);
 }
 
-json::Node RequestHandler::StatStop(json::Node& stop_node) {
+json::Node RequestHandler::GetStatStop(json::Node& stop_node) {
 	json::Dict result;
 	json::Dict stop_stat = stop_node.AsMap();
 	std::string stop_name = stop_stat.find("name")->second.AsString();
@@ -95,7 +95,7 @@ json::Node RequestHandler::StatStop(json::Node& stop_node) {
 		result["error_message"s] = json::Node{ "not found"s };
 	}
 	else {
-		auto busstops = db_.StopInfo(db_.FindStop(stop_name));
+		auto busstops = db_.GetStopInfo(db_.FindStop(stop_name));
 		if (!busstops.size()) {
 			result["buses"s] = json::Node{ json::Array{} };
 		}
@@ -110,7 +110,7 @@ json::Node RequestHandler::StatStop(json::Node& stop_node) {
 	}
 	return json::Node{ result };
 }
-json::Node RequestHandler::StatRoute(json::Node& route_node) {
+json::Node RequestHandler::GetStatRoute(json::Node& route_node) {
 	json::Dict result;
 	json::Dict route_stat = route_node.AsMap();
 	std::string route_name = route_stat.find("name"s)->second.AsString();
@@ -119,7 +119,7 @@ json::Node RequestHandler::StatRoute(json::Node& route_node) {
 		result["error_message"s] = json::Node{ "not found"s };
 	}
 	else {
-		RoutInfoS rout_info = db_.RouteInfo(route_name);
+		RouteInfo rout_info = db_.GetRouteInfo(route_name);
 		result["curvature"s] = json::Node{ rout_info.curvature };
 		result["route_length"s] = json::Node{ rout_info.route_length };
 		result["stop_count"s] = json::Node{ static_cast<int>(rout_info.rout_stops_count) };

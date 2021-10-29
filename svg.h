@@ -47,17 +47,17 @@ namespace svg {
     inline const Color NoneColor{ "none" };
 
     enum class StrokeLineCap {
-        BUTT,
-        ROUND,
-        SQUARE,
+        kButt = 0,
+        kRound = 1,
+        kSquare = 2
     };
     std::ostream& operator<<(std::ostream& out, const StrokeLineCap& linecap);
     enum class StrokeLineJoin {
-        ARCS,
-        BEVEL,
-        MITER,
-        MITER_CLIP,
-        ROUND,
+        kArcs = 0,
+        kBevel = 1,
+        kMiter = 2,
+        kMiterClip = 3,
+        kRound = 4
     };
     std::ostream& operator<<(std::ostream& out, const StrokeLineJoin& linejoin);
 
@@ -150,6 +150,7 @@ namespace svg {
             fill_color_ = color;
             return AsOwner();
         }
+
         Owner& SetStrokeColor(Color color) {
             stroke_color_ = color;
             return AsOwner();
@@ -159,15 +160,16 @@ namespace svg {
             width_ = std::move(width);
             return AsOwner();
         }
+
         Owner& SetStrokeLineCap(StrokeLineCap line_cap) {
             line_cap_ = std::move(line_cap);
             return AsOwner();
         }
+
         Owner& SetStrokeLineJoin(StrokeLineJoin line_join) {
             line_join_ = std::move(line_join);
             return AsOwner();
         }
-
     protected:
         ~PathProps() = default;
 

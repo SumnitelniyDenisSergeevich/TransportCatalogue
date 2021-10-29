@@ -12,7 +12,7 @@ struct Stop {
 		return (this == &other);
 	}
 };
-struct RoutInfoS {
+struct RouteInfo {
 	size_t rout_stops_count;
 	size_t unic_rout_stop_count;
 	double route_length;

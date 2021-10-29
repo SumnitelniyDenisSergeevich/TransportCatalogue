@@ -14,9 +14,9 @@ public:
     
     void ProcessRequests(std::ostream& out);
 
-    json::Node StatStop(json::Node& stop_node);
+    json::Node GetStatStop(json::Node& stop_node);
 
-    json::Node StatRoute(json::Node& route_node);
+    json::Node GetStatRoute(json::Node& route_node);
 
     svg::Document RenderMap(const transport_catalogue::TransportCatalogue& db) const;
 private:

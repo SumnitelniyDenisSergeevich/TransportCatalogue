@@ -11,7 +11,7 @@ namespace transport_catalogue {
 		for (const auto& stop : stops) {
 			for (const auto& busstop : stops_) {
 				if (busstop.name == stop) {
-					stop__by_buses_[&busstop].insert(buses_.back().name);
+					stop_by_buses_[&busstop].insert(buses_.back().name);
 				}
 			}
 		}
@@ -35,8 +35,8 @@ namespace transport_catalogue {
 		return nullptr;
 	}
 
-	RoutInfoS TransportCatalogue::RouteInfo(const string& bus_name) const {
-		RoutInfoS rout_info;
+	RouteInfo TransportCatalogue::GetRouteInfo(const string& bus_name) const {
+		::RouteInfo rout_info;
 		const Bus* bus = FindRoute(bus_name);
 		if (!bus) {
 			throw invalid_argument("bus is not found"s);
@@ -64,9 +64,9 @@ namespace transport_catalogue {
 		return rout_info;
 	}
 
-	std::set<string_view> TransportCatalogue::StopInfo(const Stop* stop) const {
-		if (stop__by_buses_.count(stop) != 0) {
-			return stop__by_buses_.at(stop);
+	std::set<string_view> TransportCatalogue::GetStopInfo(const Stop* stop) const {
+		if (stop_by_buses_.count(stop) != 0) {
+			return stop_by_buses_.at(stop);
 		}
 		return {};
 	}

@@ -23,19 +23,19 @@ namespace renderer {
 
 		svg::Document RenderSVG(const transport_catalogue::TransportCatalogue& db_) const;
 	private:
-		double width_;
-		double height_;
-		double padding_;
-		double line_width_;
-		double stop_radius_;
-		uint32_t bus_label_font_size_;
-		std::array<double, 2> bus_label_offset_;
-		uint32_t stop_label_font_size_;
-		std::array<double, 2> stop_label_offset_;
-		svg::Color underlayer_color_;
-		double underlayer_width_;  
-		std::vector<svg::Color> color_palette_;
-
 		void DrawText(svg::Text& text, svg::Text& podlojka) const;
+
+		double width_ = 0.0;
+		double height_ = 0.0;
+		double padding_ = 0.0;
+		double line_width_ = 0.0;
+		double stop_radius_ = 0.0;
+		uint32_t bus_label_font_size_ = 0;
+		std::array<double, 2> bus_label_offset_ = { 0.0, 0.0 };
+		uint32_t stop_label_font_size_ = 0;
+		std::array<double, 2> stop_label_offset_ = { 0.0, 0.0 };
+		svg::Color underlayer_color_ = "none";
+		double underlayer_width_ = 0.0;
+		std::vector<svg::Color> color_palette_;
 	};
 }//renderer

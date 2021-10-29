@@ -20,7 +20,7 @@ namespace transport_catalogue {
     namespace transport_catalogue_input {
         void FillCatalog(Node& base_requests, TransportCatalogue& tc) {
             Array bus_requests;
-            unordered_map<string,Dict> from_to_dist;
+            unordered_map<string, Dict> from_to_dist;
             for (auto base_request : base_requests.AsArray()) {// вектор запросов, который содержит map
                 auto map_iter = base_request.AsMap().find("type");
                 if (map_iter->second.AsString() == "Stop"s) {
@@ -61,6 +61,7 @@ namespace transport_catalogue {
                 }
                 return { result, array_str };
             }
+
             Stop FillStop(const Node& node_stop, unordered_map<string, Dict>& from_to_dist) {
                 Stop result;
                 result.name = node_stop.AsMap().at("name"s).AsString();

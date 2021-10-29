@@ -43,7 +43,7 @@ namespace renderer {
 
 	svg::Document MapRender::RenderSVG(const transport_catalogue::TransportCatalogue& db_) const {
 
-		auto stop_name__to_stop = db_.GetStopNameToStop();
+		auto stop_name_to_stop = db_.GetStopNameToStop();
 
 		svg::Document result;
 
@@ -51,8 +51,8 @@ namespace renderer {
 		double min_lon = 0.0, max_lon = min_lon;
 		bool b = true;
 
-		for (auto& [stop_name, stop] : stop_name__to_stop) {
-			if (db_.StopInfo(stop).size() != 0) {
+		for (auto& [stop_name, stop] : stop_name_to_stop) {
+			if (db_.GetStopInfo(stop).size() != 0) {
 				if (b) {
 					min_lat = stop->coordinates.lat;
 					max_lat = min_lat;
@@ -82,15 +82,15 @@ namespace renderer {
 			zoom_coef = 0.0;
 		}
 		//========================================================================рисуем линиии=======================================
-		auto bus_name__to_bus = db_.GetBusNameToBus();
+		auto bus_name_to_bus = db_.GetBusNameToBus();
 
 		size_t i = 0;
-		for (auto& [bus_name, bus] : bus_name__to_bus) {
+		for (auto& [bus_name, bus] : bus_name_to_bus) {
 			if (bus->bus_stops.size() != 0) {
 				svg::Polyline polyline;
 				vector<pair<double, double>> points;
 				polyline.SetStrokeColor(color_palette_.at(i)).SetFillColor("none"s).SetStrokeWidth(line_width_)
-					.SetStrokeLineCap(svg::StrokeLineCap::ROUND).SetStrokeLineJoin(svg::StrokeLineJoin::ROUND);
+					.SetStrokeLineCap(svg::StrokeLineCap::kRound).SetStrokeLineJoin(svg::StrokeLineJoin::kRound);
 				for (auto& stop : bus->bus_stops) {
 					double x = (stop->coordinates.lng - min_lon) * zoom_coef + padding_;
 					double y = (max_lat - stop->coordinates.lat) * zoom_coef + padding_;
@@ -122,7 +122,7 @@ namespace renderer {
 
 		//========================================================================рисуем текст=======================================
 		i = 0;
-		for (auto& [bus_name, bus] : bus_name__to_bus) {
+		for (auto& [bus_name, bus] : bus_name_to_bus) {
 			if (bus->bus_stops.size() != 0) {
 				if (bus->circle_key) {
 					svg::Text text;
@@ -183,10 +183,10 @@ namespace renderer {
 			}
 		}
 		//========================================================================рисуем символы остановок=======================================
-		for (auto& [stop_name, stop] : stop_name__to_stop) {
-			for (auto& [bus_name, bus] : bus_name__to_bus) {
+		for (auto& [stop_name, stop] : stop_name_to_stop) {
+			for (auto& [bus_name, bus] : bus_name_to_bus) {
 				if (bus->bus_stops.size() != 0) {
-					if (db_.StopInfo(stop).count(bus_name)) {
+					if (db_.GetStopInfo(stop).count(bus_name)) {
 
 						svg::Circle stop_simbol;
 						double x = (stop->coordinates.lng - min_lon) * zoom_coef + padding_;
@@ -200,10 +200,10 @@ namespace renderer {
 		}
 
 		//========================================================================рисуем названия остановок=======================================
-		for (auto& [stop_name, stop] : stop_name__to_stop) {
-			for (auto& [bus_name, bus] : bus_name__to_bus) {
+		for (auto& [stop_name, stop] : stop_name_to_stop) {
+			for (auto& [bus_name, bus] : bus_name_to_bus) {
 				if (bus->bus_stops.size() != 0) {
-					if (db_.StopInfo(stop).count(bus_name)) {
+					if (db_.GetStopInfo(stop).count(bus_name)) {
 
 						svg::Text text_stop_name;
 						svg::Text podlojka;
@@ -213,7 +213,7 @@ namespace renderer {
 						text_stop_name.SetFontFamily("Verdana"s).SetData(stop->name).SetFillColor("black"s);
 						podlojka.SetPosition({ x,y }).SetOffset({ stop_label_offset_[0],stop_label_offset_[1] }).SetFontSize(stop_label_font_size_);
 						podlojka.SetFontFamily("Verdana"s).SetData(stop->name).SetFillColor(underlayer_color_).SetStrokeWidth(underlayer_width_);
-						podlojka.SetStrokeLineCap(svg::StrokeLineCap::ROUND).SetStrokeLineJoin(svg::StrokeLineJoin::ROUND).SetStrokeColor(underlayer_color_);
+						podlojka.SetStrokeLineCap(svg::StrokeLineCap::kRound).SetStrokeLineJoin(svg::StrokeLineJoin::kRound).SetStrokeColor(underlayer_color_);
 						result.Add(podlojka);
 						result.Add(text_stop_name);
 						break;
@@ -229,7 +229,7 @@ namespace renderer {
 		text.SetFontFamily("Verdana"s).SetFontWeight("bold"s);
 		podlojka.SetOffset({ bus_label_offset_[0],bus_label_offset_[1] }).SetFontSize(bus_label_font_size_);
 		podlojka.SetFontFamily("Verdana"s).SetFontWeight("bold"s).SetFillColor(underlayer_color_).SetStrokeWidth(underlayer_width_);
-		podlojka.SetStrokeLineCap(svg::StrokeLineCap::ROUND).SetStrokeLineJoin(svg::StrokeLineJoin::ROUND).SetStrokeColor(underlayer_color_);
+		podlojka.SetStrokeLineCap(svg::StrokeLineCap::kRound).SetStrokeLineJoin(svg::StrokeLineJoin::kRound).SetStrokeColor(underlayer_color_);
 	}
 
 }// renderer

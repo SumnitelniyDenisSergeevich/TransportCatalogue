@@ -25,8 +25,8 @@ namespace transport_catalogue {
 		const Bus* FindRoute(const std::string& bus_name) const;
 		const Stop* FindStop(const std::string& stop_name) const;
 
-		RoutInfoS RouteInfo(const std::string& bus_name) const;
-		std::set<std::string_view> StopInfo(const Stop* stop) const;
+		RouteInfo GetRouteInfo(const std::string& bus_name) const;
+		std::set<std::string_view> GetStopInfo(const Stop* stop) const;
 
 		void SetDistanceBetweenStops(const Stop* from, const Stop* to, const uint32_t dist);
 		double GetDistanceBetweenStops(const Stop* from, const Stop* to) const;
@@ -45,7 +45,7 @@ namespace transport_catalogue {
 		std::deque<Stop> stops_;
 		std::map<std::string_view, const Bus*> busname_to_bus_;
 		std::map<std::string_view, const Stop*> stopname_to_stop_;
-		std::unordered_map<const Stop*, std::set<std::string_view>> stop__by_buses_; 
+		std::unordered_map<const Stop*, std::set<std::string_view>> stop_by_buses_; 
 		DistFromTo from_to_dist_;
 	};
 }//namespace transport_catalogue

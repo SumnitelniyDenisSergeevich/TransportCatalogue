@@ -8,13 +8,13 @@ namespace svg {
 
     std::ostream& operator<<(std::ostream& out, const StrokeLineCap& linecap) {
         switch (linecap) {
-        case StrokeLineCap::BUTT:
+        case StrokeLineCap::kButt:
             out << "butt"s;
             break;
-        case StrokeLineCap::ROUND:
+        case StrokeLineCap::kRound:
             out << "round"s;
             break;
-        case StrokeLineCap::SQUARE:
+        case StrokeLineCap::kSquare:
             out << "square"s;
             break;
         }
@@ -23,19 +23,19 @@ namespace svg {
 
     std::ostream& operator<<(std::ostream& out, const StrokeLineJoin& linejoin) {
         switch (linejoin) {
-        case StrokeLineJoin::ARCS:
+        case StrokeLineJoin::kArcs:
             out << "arcs"s;
             break;
-        case StrokeLineJoin::BEVEL:
+        case StrokeLineJoin::kBevel:
             out << "bevel"s;
             break;
-        case StrokeLineJoin::MITER:
+        case StrokeLineJoin::kMiter:
             out << "miter"s;
             break;
-        case StrokeLineJoin::MITER_CLIP:
+        case StrokeLineJoin::kMiterClip:
             out << "miter-clip"s;
             break;
-        case StrokeLineJoin::ROUND:
+        case StrokeLineJoin::kRound:
             out << "round"s;
             break;
         }
