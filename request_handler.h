@@ -1,27 +1,19 @@
 #pragma once
 #include "transport_catalogue.h"
 #include "map_renderer.h"
-#include "json.h"
-
-#include <iostream>
 
 class RequestHandler {
 
 public:
-    RequestHandler(const transport_catalogue::TransportCatalogue& db, renderer::MapRender& renderer, const json::Dict requests);
-
-	void FillRenderSettings();
+    RequestHandler(const transport_catalogue::TransportCatalogue& db, renderer::MapRender& renderer);
     
-    void ProcessRequests(std::ostream& out);
+    std::optional<RouteInfo> GetBusStat(const std::string& bus_name) const;
 
-    json::Node GetStatStop(json::Node& stop_node);
+    std::optional < std::set<std::string_view>> GetBusesByStop(const std::string& stop_name) const;
 
-    json::Node GetStatRoute(json::Node& route_node);
-
-    svg::Document RenderMap(const transport_catalogue::TransportCatalogue& db) const;
+    svg::Document RenderMap() const;
 private:
     const transport_catalogue::TransportCatalogue& db_;
     renderer::MapRender& renderer_;
-    const json::Dict requests_;
 };
 

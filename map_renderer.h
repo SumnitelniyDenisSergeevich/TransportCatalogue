@@ -1,5 +1,4 @@
 #pragma once
-#include "domain.h"
 #include "svg.h"
 #include "transport_catalogue.h"
 
