@@ -1,7 +1,5 @@
 #include "svg.h"
 
-#include <iostream> // delete
-
 namespace svg {
 
     using namespace std::literals;
