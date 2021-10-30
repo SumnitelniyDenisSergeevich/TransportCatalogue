@@ -12,12 +12,13 @@ namespace json {
     using Dict = std::map<std::string, Node>;
     using Var = std::variant<nullptr_t, Array, Dict, bool, int, double, std::string>;
 
-    // Эта ошибка должна выбрасываться при ошибках парсинга JSON
     class ParsingError : public std::runtime_error {
     public:
         using runtime_error::runtime_error;
     };
+
     using namespace std::literals;
+
     struct NodeValueVisitor {
         std::ostream& out;
         static int otstup;
@@ -30,11 +31,10 @@ namespace json {
         void operator()(std::string str);
     };
 
-    class Node {
+    class Node : private std::variant<std::nullptr_t, Array, Dict, bool, int, double, std::string> {
     public:
-        template<typename Type>
-        Node(Type value);
-        Node() = default;
+        using variant::variant;
+        using Value = variant;
 
         const Array& AsArray() const;
         const Dict& AsMap() const;
@@ -42,7 +42,7 @@ namespace json {
         int AsInt() const;
         double AsDouble() const;
         const std::string& AsString() const;
-        const Var& Value() const;
+        const Value& GetValue() const;
 
         bool IsNull() const;
         bool IsInt() const;
@@ -55,13 +55,7 @@ namespace json {
 
         bool operator==(const Node node) const;
         bool operator!=(const Node node) const;
-    private:
-        Var value_ = {};
     };
-
-    template<typename Type>
-    Node::Node(Type value) : value_(value) {
-    }
 
     class Document {
     public:

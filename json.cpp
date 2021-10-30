@@ -1,82 +1,79 @@
 #include "json.h"
-#include <unordered_set>
 #include <unordered_map>
 
-#include <iostream> // delete
 using namespace std;
 
 namespace json {
 
     const Array& Node::AsArray() const {
-        if (this->IsArray()) {
-            return get<Array>(value_);
+        if (IsArray()) {
+            return get<Array>(*this);
         }
         throw logic_error("its not array"s);
     }
     const Dict& Node::AsMap() const {
-        if (this->IsMap()) {
-            return get<Dict>(value_);
+        if (IsMap()) {
+            return get<Dict>(*this);
         }
         throw logic_error("its not dict"s);
     }
     bool Node::AsBool() const {
-        if (this->IsBool()) {
-            return get<bool>(value_);
+        if (IsBool()) {
+            return get<bool>(*this);
         }
         throw logic_error("its not bool"s);
     }
     int Node::AsInt() const {
-        if (this->IsInt()) {
-            return get<int>(value_);
+        if (IsInt()) {
+            return get<int>(*this);
         }
         throw logic_error("its not int"s);
     }
     double Node::AsDouble() const {
-        if (this->IsInt() || this->IsDouble()) {
-            return holds_alternative<double>(value_) ? get<double>(value_) : get<int>(value_);
+        if (IsInt() || IsDouble()) {
+            return holds_alternative<double>(*this) ? get<double>(*this) : get<int>(*this);
         }
         throw logic_error("its not double"s);
     }
     const std::string& Node::AsString() const {
-        if (this->IsString()) {
-            return get<string>(value_);
+        if (IsString()) {
+            return get<string>(*this);
         }
         throw logic_error("its not string"s);
     }
 
-
-    const Var& Node::Value() const {
-        return value_;
+    const Node::Value& Node::GetValue() const {
+        return *this;
     }
 
     bool Node::IsNull() const {
-        return holds_alternative<nullptr_t>(value_);
+        return holds_alternative<nullptr_t>(*this);
     }
     bool Node::IsInt() const {
-        return holds_alternative<int>(value_);
+        return holds_alternative<int>(*this);
     }
     bool Node::IsDouble() const {
-        return holds_alternative<int>(value_) || holds_alternative<double>(value_);
+        return holds_alternative<int>(*this) || holds_alternative<double>(*this);
     }
     bool Node::IsPureDouble() const {
-        return holds_alternative<double>(value_);
+        return holds_alternative<double>(*this);
     }
     bool Node::IsString() const {
-        return holds_alternative<string>(value_);
+        return holds_alternative<string>(*this);
     }
     bool Node::IsBool() const {
-        return holds_alternative<bool>(value_);
+        return holds_alternative<bool>(*this);
     }
     bool Node::IsArray() const {
-        return holds_alternative<Array>(value_);
+        return holds_alternative<Array>(*this);
     }
     bool Node::IsMap() const {
-        return holds_alternative<Dict>(value_);
+        return holds_alternative<Dict>(*this);
     }
 
 
     bool Node::operator==(const Node node) const {
-        return this->value_ == node.value_;
+        return this == &node;
     }
     bool Node::operator!=(const Node node) const {
         return !(*this == node);
@@ -327,7 +324,7 @@ namespace json {
     }
 
     void Print(const Document& doc, std::ostream& output) {
-        std::visit(NodeValueVisitor{ output }, doc.GetRoot().Value());
+        std::visit(NodeValueVisitor{ output }, doc.GetRoot().GetValue());
     }
 
 
@@ -395,7 +392,6 @@ namespace json {
         out << val;
     }
     void NodeValueVisitor::operator()(std::string str) {
-       // unordered_set<char> escape_symbols = { '\b' ,'\f','\n','\r','\t','\v','\"' };
         unordered_map<char, char> escape_symbols = {
         {'\b','b'},
         {'\f','f'},
@@ -426,21 +422,6 @@ namespace json {
                 ++i;
             }
         }
-
-       /* while (str_iter != str.end()) {
-            cout << endl << i << endl << str << endl << *str_iter << endl;
-            if (i > 220) {
-                system("pause");
-            }
-
-
-            ++i;
-            if (auto symbol = escape_symbols.find(*str_iter); symbol != escape_symbols.end()) {
-                str.insert(str_iter, '\\');
-                ++str_iter;
-            }
-            ++str_iter;
-        }*/
         str.insert(str.begin(), '\"');
         str.push_back('\"');
         out << str;
