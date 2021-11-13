@@ -30,15 +30,27 @@ namespace transport_catalogue {
 
 		void SetDistanceBetweenStops(const Stop* from, const Stop* to, const uint32_t dist);
 		double GetDistanceBetweenStops(const Stop* from, const Stop* to) const;
+		std::pair<double,size_t> GetDistAndSpanCountBetweenStopsInRoute(const Bus& route, const Stop* from, const Stop* to, bool last_ring = false) const;
 
 		size_t UnicStopsCount(const std::string& bus_name) const;
 
-		std::map<std::string_view, const Stop*> GetStopNameToStop() const {//question
+		const std::map<std::string_view, const Stop*> GetStopNameToStop() const {//question
 			return stopname_to_stop_;
 		}
 
-		std::map<std::string_view, const Bus*> GetBusNameToBus() const {//question
+		const std::map<std::string_view, const Bus*> GetBusNameToBus() const {//question
 			return busname_to_bus_;
+		}
+
+		const size_t GetStopsCount()const {
+			return stops_.size();
+		}
+
+		const std::deque<Bus>& GetBuses() const {
+			return buses_;
+		}
+		const std::deque<Stop>& GetStops() const {
+			return stops_;
 		}
 	private:
 		std::deque<Bus> buses_;

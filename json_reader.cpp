@@ -59,6 +59,12 @@ void JsonReader::FillRenderSettings(renderer::MapRender& map) const {
 	map.SetColorPalette(color_palette_);
 }
 
+void JsonReader::FillRouteSettings(graph::Graph& graph)const {
+	json::Dict render_settings = doc_.GetRoot().AsMap().at("routing_settings"s).AsMap();
+	graph.SetBusVelocity(render_settings.at("bus_velocity"s).AsDouble());
+	graph.SetBusWaitTime(render_settings.at("bus_wait_time"s).AsInt());
+}
+
 void JsonReader::PrintRequestsAnswer(ostream& out) const {
 	json::Array stat_requests = doc_.GetRoot().AsMap().at("stat_requests"s).AsArray();
 	json::Array out_data;
@@ -78,6 +84,9 @@ void JsonReader::PrintRequestsAnswer(ostream& out) const {
 			string rendered_map = out.str();
 			result["map"s] = json::Node{ rendered_map };
 			out_data.push_back(json::Node{ result });
+		}
+		if (map_iter->second.AsString() == "Route") {											// обработка route  new
+			out_data.push_back(GetRoute(stat_request));
 		}
 	}
 	json::Print(json::Document{ json::Node{out_data} }, out);
@@ -128,10 +137,53 @@ json::Node JsonReader::GetStatRoute(const json::Node& route_node) const {
 	return json::Node{ result };
 }
 
+json::Node JsonReader::GetRoute(const json::Node& route_node) const {			//new
+	json::Dict result;
+	json::Dict route_stat = route_node.AsMap();
+	string route_from = route_stat.find("from"s)->second.AsString();
+	string route_to = route_stat.find("to"s)->second.AsString();
+	result["request_id"s] = json::Node{ route_stat.find("id"s)->second.AsInt() };
+	std::optional<graph::Router<double>::RouteInfo> route = graph_->BuildRoute(graph_->GetVertexId(route_from), graph_->GetVertexId(route_to));
+	if (route.has_value()) {
+		json::Array wastes_time;
+		for (auto edge : route->edges) {
+			json::Dict waste_time_stop;
+			json::Dict waste_time_bus;
+			auto edge_r = graph_->GetEdge(edge);
+			waste_time_stop["stop_name"s] = json::Node{ static_cast<std::string>(graph_->GetVertexStop(edge_r.from)) };
+			waste_time_stop["type"s] = json::Node{ "Wait"s };
+			waste_time_stop["time"s] = json::Node{ static_cast<int>(graph_->GetBusWaitTime()) };
+			wastes_time.push_back(waste_time_stop);
+
+			waste_time_bus["bus"s] = json::Node{ edge_r.route_name};
+			waste_time_bus["span_count"s] = json::Node{ (int)edge_r.span_count };
+			waste_time_bus["time"s] = json::Node{ edge_r.weight - graph_->GetBusWaitTime() };
+			waste_time_bus["type"s] = json::Node{ "Bus"s };
+			wastes_time.push_back(waste_time_bus);
+		}
+
+
+		result["items"s] = wastes_time;
+		result["total_time"s] = route->weight ;
+	}
+	else {
+		result["error_message"s] = json::Node{ "not found"s };
+	}
+	//auto result = router_->BuildRoute(router_->GetStop(rou)
+	//auto value = router_->BuildRoute()
+	//result["request_id"s] = json::Node{ route_stat.find("id"s)->second.AsInt() };*/
+	//// реализация
+	return json::Node{ result };
+}
+
 
 json::Dict JsonReader::GetRequests() {
 	json::Dict requests = doc_.GetRoot().AsMap();
 	return requests;
+}
+
+void JsonReader::SetGraph(const graph::Graph& graph) {
+	graph_ = &graph;
 }
 
 namespace transport_catalogue {

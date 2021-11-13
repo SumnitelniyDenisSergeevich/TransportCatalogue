@@ -20,6 +20,11 @@ struct RouteInfo {
 	double curvature;
 };
 
+struct RouteSettings {
+	inline static size_t bus_wait_time;
+	inline static double bus_velocity;
+};
+
 struct Bus {
 	std::string name;
 	bool circle_key;

@@ -89,6 +89,38 @@ namespace transport_catalogue {
 		return geo::ComputeDistance(from->coordinates, to->coordinates);
 	}
 
+	pair<double,size_t> TransportCatalogue::GetDistAndSpanCountBetweenStopsInRoute(const Bus& route, const Stop* from, const Stop* to, bool last_ring) const {
+		auto route_stops = route.bus_stops;
+		auto iter1 = find(route_stops.begin(), route_stops.end(), from);
+		auto iter2= find(route_stops.begin(), route_stops.end(), to);
+		double dist = 0.0;
+		size_t span_count = 0;
+
+		if (last_ring) {
+			for (; iter1+1 < route_stops.end(); ++iter1) {
+				dist += GetDistanceBetweenStops(*iter1, *next(iter1, 1));
+				++span_count;
+			}
+			dist += GetDistanceBetweenStops(*iter1, *route_stops.begin());
+			++span_count;
+			return { dist/1000.0, span_count };
+		}
+
+		if (iter1 < iter2) {
+			for (; iter1 < iter2; ++iter1) {
+				dist += GetDistanceBetweenStops(*iter1, *next(iter1, 1));
+				++span_count;
+			}
+		}
+		else if (iter1 > iter2) {
+			for (; iter1 > iter2; --iter1) {
+				dist += GetDistanceBetweenStops(*iter1, *next(iter1, -1));
+				++span_count;
+			}
+		}
+		return { dist/1000.0,span_count };
+	}
+
 	size_t TransportCatalogue::UnicStopsCount(const string& bus_name) const {
 		unordered_set<string_view> unic_bus_stops;
 		for (const auto& bus_stop : busname_to_bus_.at(bus_name)->bus_stops) {
