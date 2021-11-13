@@ -89,10 +89,10 @@ namespace transport_catalogue {
 		return geo::ComputeDistance(from->coordinates, to->coordinates);
 	}
 
-	pair<double,size_t> TransportCatalogue::GetDistAndSpanCountBetweenStopsInRoute(const Bus& route, const Stop* from, const Stop* to, bool last_ring) const {
+	pair<double,size_t> TransportCatalogue::GetDistAndSpanCountBetweenStopsInRoute(const Bus& route, const size_t from, const size_t to, bool last_ring) const {
 		auto route_stops = route.bus_stops;
-		auto iter1 = find(route_stops.begin(), route_stops.end(), from);
-		auto iter2= find(route_stops.begin(), route_stops.end(), to);
+		auto iter1 = route_stops.begin() + from;
+		auto iter2 = route_stops.begin() + to;
 		double dist = 0.0;
 		size_t span_count = 0;
 

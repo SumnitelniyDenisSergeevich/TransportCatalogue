@@ -30,7 +30,7 @@ namespace transport_catalogue {
 
 		void SetDistanceBetweenStops(const Stop* from, const Stop* to, const uint32_t dist);
 		double GetDistanceBetweenStops(const Stop* from, const Stop* to) const;
-		std::pair<double,size_t> GetDistAndSpanCountBetweenStopsInRoute(const Bus& route, const Stop* from, const Stop* to, bool last_ring = false) const;
+		std::pair<double,size_t> GetDistAndSpanCountBetweenStopsInRoute(const Bus& route, const size_t from, const size_t to, bool last_ring = false) const;
 
 		size_t UnicStopsCount(const std::string& bus_name) const;
 
@@ -42,7 +42,7 @@ namespace transport_catalogue {
 			return busname_to_bus_;
 		}
 
-		const size_t GetStopsCount()const {
+		size_t GetStopsCount()const {
 			return stops_.size();
 		}
 

@@ -138,7 +138,7 @@ namespace graph {
                 if (bus.circle_key) {
                     for (size_t i = 0; i < bus_stops.size(); ++i) {
                         if (i) {
-                            auto [dist, span_count] = catalogue.GetDistAndSpanCountBetweenStopsInRoute(bus, bus_stops[i], bus_stops[0], true);
+                            auto [dist, span_count] = catalogue.GetDistAndSpanCountBetweenStopsInRoute(bus, i, 0, true);
                             graph_.AddEdge(graph::Edge<double>{ stop_id_.at(bus_stops[i]->name),
                                 stop_id_.at(bus_stops[0]->name),
                                 dist / route_settings_.bus_velocity * 60.0 + route_settings_.bus_wait_time,
@@ -146,7 +146,7 @@ namespace graph {
                                 span_count});
                         }
                         for (size_t j = i + 1; j < bus_stops.size(); ++j) {
-                            auto [dist, span_count] = catalogue.GetDistAndSpanCountBetweenStopsInRoute(bus, bus_stops[i], bus_stops[j]);
+                            auto [dist, span_count] = catalogue.GetDistAndSpanCountBetweenStopsInRoute(bus, i, j);
                             graph_.AddEdge(graph::Edge<double>{ stop_id_.at(bus_stops[i]->name),
                                 stop_id_.at(bus_stops[j]->name),
                                 dist / route_settings_.bus_velocity * 60.0 + route_settings_.bus_wait_time,
@@ -159,7 +159,7 @@ namespace graph {
                     for (size_t i = 0; i < bus_stops.size(); ++i) {
                         for (size_t j = 0; j < bus_stops.size(); ++j) {
                             if (i != j) {
-                                auto [dist, span_count] = catalogue.GetDistAndSpanCountBetweenStopsInRoute(bus, bus_stops[i], bus_stops[j]);
+                                auto [dist, span_count] = catalogue.GetDistAndSpanCountBetweenStopsInRoute(bus, i, j);
                                 graph_.AddEdge(graph::Edge<double>{ stop_id_.at(bus_stops[i]->name),
                                     stop_id_.at(bus_stops[j]->name),
                                     dist / route_settings_.bus_velocity * 60.0 + route_settings_.bus_wait_time,
@@ -184,7 +184,7 @@ namespace graph {
             return graph_;
         }
 
-        const size_t GetVertexId(std::string_view stop)const {
+        size_t GetVertexId(std::string_view stop)const {
             return stop_id_.at(stop);
         }
         const std::string_view GetVertexStop(size_t id)const {
@@ -199,7 +199,7 @@ namespace graph {
             return graph_.GetEdge(edge_id);
         }
 
-        const size_t GetBusWaitTime() const {
+        size_t GetBusWaitTime() const {
             return route_settings_.bus_wait_time;
         }
 
