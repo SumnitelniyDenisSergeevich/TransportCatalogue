@@ -25,33 +25,19 @@ namespace transport_catalogue {
 		const Bus* FindRoute(const std::string& bus_name) const;
 		const Stop* FindStop(const std::string& stop_name) const;
 
+		void SetDistanceBetweenStops(const Stop* from, const Stop* to, const uint32_t dist);
+
 		RouteInfo GetRouteInfo(const std::string& bus_name) const;
 		std::set<std::string_view> GetStopInfo(const Stop* stop) const;
-
-		void SetDistanceBetweenStops(const Stop* from, const Stop* to, const uint32_t dist);
 		double GetDistanceBetweenStops(const Stop* from, const Stop* to) const;
+		const std::map<std::string_view, const Stop*>& GetStopNameToStop() const;
+		const std::map<std::string_view, const Bus*>& GetBusNameToBus() const;
+		size_t GetStopsCount() const;
+		const std::deque<Bus>& GetBuses() const;
+		const std::deque<Stop>& GetStops() const;
 		std::pair<double,size_t> GetDistAndSpanCountBetweenStopsInRoute(const Bus& route, const size_t from, const size_t to, bool last_ring = false) const;
 
 		size_t UnicStopsCount(const std::string& bus_name) const;
-
-		const std::map<std::string_view, const Stop*> GetStopNameToStop() const {//question
-			return stopname_to_stop_;
-		}
-
-		const std::map<std::string_view, const Bus*> GetBusNameToBus() const {//question
-			return busname_to_bus_;
-		}
-
-		size_t GetStopsCount()const {
-			return stops_.size();
-		}
-
-		const std::deque<Bus>& GetBuses() const {
-			return buses_;
-		}
-		const std::deque<Stop>& GetStops() const {
-			return stops_;
-		}
 	private:
 		std::deque<Bus> buses_;
 		std::deque<Stop> stops_;

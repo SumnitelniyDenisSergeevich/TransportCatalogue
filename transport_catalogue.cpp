@@ -128,4 +128,20 @@ namespace transport_catalogue {
 		}
 		return unic_bus_stops.size();
 	}
+
+	const std::map<std::string_view, const Stop*>& TransportCatalogue::GetStopNameToStop() const {
+		return stopname_to_stop_;
+	}
+	const std::map<std::string_view, const Bus*>& TransportCatalogue::GetBusNameToBus() const {
+		return busname_to_bus_;
+	}
+	size_t TransportCatalogue::GetStopsCount() const {
+		return stops_.size();
+	}
+	const std::deque<Bus>& TransportCatalogue::GetBuses() const {
+		return buses_;
+	}
+	const std::deque<Stop>& TransportCatalogue::GetStops() const {
+		return stops_;
+	}
 }

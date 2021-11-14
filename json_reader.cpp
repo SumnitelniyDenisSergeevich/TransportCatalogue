@@ -7,8 +7,8 @@ JsonReader::JsonReader(istream& in, RequestHandler& rh) : doc_(json::Load(in)), 
 }
 
 void JsonReader::FillCatalogue(transport_catalogue::TransportCatalogue& tc) const {
-    auto iter = doc_.GetRoot().AsMap().at("base_requests"s);
-    transport_catalogue::transport_catalogue_input::FillCatalog(iter, tc);
+    auto requests = doc_.GetRoot().AsMap().at("base_requests"s);
+    transport_catalogue::transport_catalogue_input::FillCatalog(requests, tc);
 }
 
 void JsonReader::FillRenderSettings(renderer::MapRender& map) const {
@@ -59,10 +59,9 @@ void JsonReader::FillRenderSettings(renderer::MapRender& map) const {
 	map.SetColorPalette(color_palette_);
 }
 
-void JsonReader::FillRouteSettings(graph::Graph& graph)const {
+void JsonReader::FillRouteSettings(TransportRouter& t_r)const {
 	json::Dict render_settings = doc_.GetRoot().AsMap().at("routing_settings"s).AsMap();
-	graph.SetBusVelocity(render_settings.at("bus_velocity"s).AsDouble());
-	graph.SetBusWaitTime(render_settings.at("bus_wait_time"s).AsInt());
+	t_r.SetRouteSettings(render_settings.at("bus_velocity"s).AsDouble(), render_settings.at("bus_wait_time"s).AsInt());
 }
 
 void JsonReader::PrintRequestsAnswer(ostream& out) const {
@@ -143,21 +142,22 @@ json::Node JsonReader::GetRoute(const json::Node& route_node) const {			//new
 	string route_from = route_stat.find("from"s)->second.AsString();
 	string route_to = route_stat.find("to"s)->second.AsString();
 	result["request_id"s] = json::Node{ route_stat.find("id"s)->second.AsInt() };
-	std::optional<graph::Router<double>::RouteInfo> route = graph_->BuildRoute(graph_->GetVertexId(route_from), graph_->GetVertexId(route_to));
+	std::optional<graph::Router<double>::RouteInfo> route = transport_router_->BuildRoute(transport_router_->GetVertexId(route_from),
+																							transport_router_->GetVertexId(route_to));
 	if (route.has_value()) {
 		json::Array wastes_time;
 		for (auto edge : route->edges) {
 			json::Dict waste_time_stop;
 			json::Dict waste_time_bus;
-			auto edge_r = graph_->GetEdge(edge);
-			waste_time_stop["stop_name"s] = json::Node{ static_cast<std::string>(graph_->GetVertexStop(edge_r.from)) };
+			auto edge_r = transport_router_->GetEdge(edge);
+			waste_time_stop["stop_name"s] = json::Node{ static_cast<std::string>(transport_router_->GetVertexStop(edge_r.from)) };
 			waste_time_stop["type"s] = json::Node{ "Wait"s };
-			waste_time_stop["time"s] = json::Node{ static_cast<int>(graph_->GetBusWaitTime()) };
+			waste_time_stop["time"s] = json::Node{ static_cast<int>(transport_router_->GetBusWaitTime()) };
 			wastes_time.push_back(waste_time_stop);
 
 			waste_time_bus["bus"s] = json::Node{ edge_r.route_name};
 			waste_time_bus["span_count"s] = json::Node{ (int)edge_r.span_count };
-			waste_time_bus["time"s] = json::Node{ edge_r.weight - graph_->GetBusWaitTime() };
+			waste_time_bus["time"s] = json::Node{ edge_r.weight - transport_router_->GetBusWaitTime() };
 			waste_time_bus["type"s] = json::Node{ "Bus"s };
 			wastes_time.push_back(waste_time_bus);
 		}
@@ -169,26 +169,21 @@ json::Node JsonReader::GetRoute(const json::Node& route_node) const {			//new
 	else {
 		result["error_message"s] = json::Node{ "not found"s };
 	}
-	//auto result = router_->BuildRoute(router_->GetStop(rou)
-	//auto value = router_->BuildRoute()
-	//result["request_id"s] = json::Node{ route_stat.find("id"s)->second.AsInt() };*/
-	//// реализация
 	return json::Node{ result };
 }
 
 
-json::Dict JsonReader::GetRequests() {
-	json::Dict requests = doc_.GetRoot().AsMap();
-	return requests;
+const json::Dict& JsonReader::GetRequests() const {
+	return doc_.GetRoot().AsMap();
 }
 
-void JsonReader::SetGraph(const graph::Graph& graph) {
-	graph_ = &graph;
+void JsonReader::SetTransportRouter(const TransportRouter& transport_router) {
+	transport_router_ = &transport_router;
 }
 
 namespace transport_catalogue {
     namespace transport_catalogue_input {
-        void FillCatalog(Node& base_requests, TransportCatalogue& tc) {
+        void FillCatalog(const Node& base_requests, TransportCatalogue& tc) {
             Array bus_requests;
             unordered_map<string, Dict> from_to_dist;
             for (auto base_request : base_requests.AsArray()) {// вектор запросов, который содержит map

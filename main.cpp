@@ -3,7 +3,7 @@
 #include "map_renderer.h"
 #include "json_builder.h"
 
-#include "router.h" //new
+#include "transport_router.h"
 
 #include <fstream>
 
@@ -29,13 +29,14 @@ int main() {
 
 
     json_reader.FillCatalogue(catalogue);
-    graph::Graph graph(catalogue.GetStopsCount());
-    json_reader.FillRouteSettings(graph);
-    graph.SetVertexId(catalogue.GetStops());
-    graph.SetGraph(catalogue);
-    graph::Router router(graph.GetGraph());
-    graph.SetRouter(router);
-    json_reader.SetGraph(graph);
+
+    TransportRouter transport_router(catalogue.GetStopsCount());
+    json_reader.FillRouteSettings(transport_router);
+    transport_router.FillGraph(catalogue);
+    graph::Router router(transport_router.GetGraph());
+    transport_router.SetRouter(router);
+    json_reader.SetTransportRouter(transport_router);
+
     json_reader.FillRenderSettings(map);
     json_reader.PrintRequestsAnswer(out);
 

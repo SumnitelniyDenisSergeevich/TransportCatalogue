@@ -5,7 +5,7 @@
 class RequestHandler {
 
 public:
-    RequestHandler(const transport_catalogue::TransportCatalogue& db, renderer::MapRender& renderer);
+    RequestHandler(const transport_catalogue::TransportCatalogue& db, const renderer::MapRender& renderer);
     
     std::optional<RouteInfo> GetBusStat(const std::string& bus_name) const;
 
@@ -14,6 +14,6 @@ public:
     svg::Document RenderMap() const;
 private:
     const transport_catalogue::TransportCatalogue& db_;
-    renderer::MapRender& renderer_;
+    const renderer::MapRender& renderer_;
 };
 

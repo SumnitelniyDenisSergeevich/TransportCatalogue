@@ -3,7 +3,7 @@
 using namespace std;
 using namespace ::renderer;
 
-RequestHandler::RequestHandler(const transport_catalogue::TransportCatalogue& db, MapRender& renderer) : db_(db), renderer_(renderer) {
+RequestHandler::RequestHandler(const transport_catalogue::TransportCatalogue& db, const MapRender& renderer) : db_(db), renderer_(renderer) {
 }
 
 
