@@ -146,22 +146,22 @@ json::Node JsonReader::GetRoute(const json::Node& route_node) const {			//new
 	string route_from = route_stat.find("from"s)->second.AsString();
 	string route_to = route_stat.find("to"s)->second.AsString();
 	result["request_id"s] = json::Node{ route_stat.find("id"s)->second.AsInt() };
-	std::optional<graph::Router<double>::RouteInfo> route = transport_router_->BuildRoute(transport_router_->GetVertexId(route_from),
-																							transport_router_->GetVertexId(route_to));
+	std::optional<graph::Router<double>::RouteInfo> route = rh_.BuildRoute(rh_.GetVertexId(route_from),
+													rh_.GetVertexId(route_to));
 	if (route.has_value()) {
 		json::Array wastes_time;
 		for (auto edge : route->edges) {
 			json::Dict waste_time_stop;
 			json::Dict waste_time_bus;
-			auto edge_r = transport_router_->GetEdge(edge);
-			waste_time_stop["stop_name"s] = json::Node{ static_cast<std::string>(transport_router_->GetVertexStop(edge_r.from)) };
+			auto edge_r = rh_.GetEdge(edge);
+			waste_time_stop["stop_name"s] = json::Node{ static_cast<std::string>(rh_.GetVertexStop(edge_r.from)) };
 			waste_time_stop["type"s] = json::Node{ "Wait"s };
-			waste_time_stop["time"s] = json::Node{ static_cast<int>(transport_router_->GetBusWaitTime()) };
+			waste_time_stop["time"s] = json::Node{ static_cast<int>(rh_.GetBusWaitTime()) };
 			wastes_time.push_back(waste_time_stop);
 
 			waste_time_bus["bus"s] = json::Node{ edge_r.route_name};
 			waste_time_bus["span_count"s] = json::Node{ (int)edge_r.span_count };
-			waste_time_bus["time"s] = json::Node{ edge_r.weight - transport_router_->GetBusWaitTime() };
+			waste_time_bus["time"s] = json::Node{ edge_r.weight - rh_.GetBusWaitTime() };
 			waste_time_bus["type"s] = json::Node{ "Bus"s };
 			wastes_time.push_back(waste_time_bus);
 		}
@@ -179,10 +179,6 @@ json::Node JsonReader::GetRoute(const json::Node& route_node) const {			//new
 
 const json::Dict& JsonReader::GetRequests() const {
 	return doc_.GetRoot().AsMap();
-}
-
-void JsonReader::SetTransportRouter(const TransportRouter& transport_router) {
-	transport_router_ = &transport_router;
 }
 
 namespace transport_catalogue {

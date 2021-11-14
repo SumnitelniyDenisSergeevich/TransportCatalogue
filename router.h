@@ -8,11 +8,8 @@
 #include <iterator>
 #include <optional>
 #include <stdexcept>
-#include <unordered_map>
 #include <utility>
 #include <vector>
-
-#include <iostream> // delete
 
 namespace graph {
 
@@ -80,7 +77,6 @@ namespace graph {
         static constexpr Weight ZERO_WEIGHT{};
         const Graph& graph_;
         RoutesInternalData routes_internal_data_;
-        const std::unordered_map<size_t, std::string_view>* id_stop_;
     };
 
     template <typename Weight>

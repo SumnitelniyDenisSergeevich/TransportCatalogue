@@ -5,6 +5,7 @@
 
 #include "transport_router.h"
 
+#include <iostream>
 #include <fstream>
 
 using namespace json;
@@ -20,21 +21,22 @@ int main() {
     TransportCatalogue catalogue;
     MapRender map;
     RequestHandler request_handler(catalogue, map);
-    JsonReader json_reader(in, request_handler);
+    JsonReader json_reader(cin, request_handler);
 
 
     json_reader.FillCatalogue(catalogue);
 
-    TransportRouter transport_router(catalogue.GetStopsCount());
+    TransportRouter transport_router(catalogue);
     json_reader.FillRouteSettings(transport_router);
-    transport_router.FillVertexes(catalogue.GetStops());
-    transport_router.FillGraphWithRoutes(catalogue);
+    transport_router.FillVertexes();
+    transport_router.FillGraphWithRoutes();
+    request_handler.SetTransportRouter(transport_router);
     graph::Router router(transport_router.GetGraph());
     transport_router.SetRouter(router);
-    json_reader.SetTransportRouter(transport_router);
+
 
     json_reader.FillRenderSettings(map);
-    json_reader.PrintRequestsAnswer(out);
+    json_reader.PrintRequestsAnswer(cout);
 
     in.close();
     out.close();

@@ -13,7 +13,6 @@ public:
 	void FillRouteSettings(TransportRouter&)const;
 	void PrintRequestsAnswer(std::ostream& out) const;
 	const json::Dict& GetRequests() const;
-	void SetTransportRouter(const TransportRouter& transport_router);
 private:
 	json::Node GetStatStop(const json::Node& stop_node) const;
 	json::Node GetStatRoute(const json::Node& route_node) const;
@@ -21,7 +20,6 @@ private:
 
 	json::Document doc_;
 	RequestHandler& rh_;
-	const TransportRouter* transport_router_;
 };
 
 

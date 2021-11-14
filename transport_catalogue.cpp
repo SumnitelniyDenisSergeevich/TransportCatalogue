@@ -89,38 +89,6 @@ namespace transport_catalogue {
 		return geo::ComputeDistance(from->coordinates, to->coordinates);
 	}
 
-	pair<double, size_t> TransportCatalogue::GetDistAndSpanCountBetweenStopsInRoute(const std::vector<const Stop*>& route_stops,
-																	const size_t from, const size_t to, bool last_ring) const {
-		auto station_from = route_stops.begin() + from;
-		auto station_to = route_stops.begin() + to;
-		double dist = 0.0;
-		size_t span_count = 0;
-
-		if (last_ring) {
-			for (; station_from + 1 < route_stops.end(); ++station_from) {
-				dist += GetDistanceBetweenStops(*station_from, *next(station_from, 1));
-				++span_count;
-			}
-			dist += GetDistanceBetweenStops(*station_from, *route_stops.begin());
-			++span_count;
-			return { dist / 1000.0, span_count };
-		}
-
-		if (station_from < station_to) {
-			for (; station_from < station_to; ++station_from) {
-				dist += GetDistanceBetweenStops(*station_from, *next(station_from, 1));
-				++span_count;
-			}
-		}
-		else if (station_from > station_to) {
-			for (; station_from > station_to; --station_from) {
-				dist += GetDistanceBetweenStops(*station_from, *next(station_from, -1));
-				++span_count;
-			}
-		}
-		return { dist / 1000.0, span_count };
-	}
-
 	size_t TransportCatalogue::UnicStopsCount(const string& bus_name) const {
 		unordered_set<string_view> unic_bus_stops;
 		for (const auto& bus_stop : busname_to_bus_.at(bus_name)->bus_stops) {
