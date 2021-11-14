@@ -25,7 +25,7 @@ int main() {
     TransportCatalogue catalogue;
     MapRender map;
     RequestHandler request_handler(catalogue, map);
-    JsonReader json_reader(in, request_handler);
+    JsonReader json_reader(сin, request_handler);
 
 
     json_reader.FillCatalogue(catalogue);
@@ -38,7 +38,7 @@ int main() {
     json_reader.SetTransportRouter(transport_router);
 
     json_reader.FillRenderSettings(map);
-    json_reader.PrintRequestsAnswer(out);
+    json_reader.PrintRequestsAnswer(сout);
 
     in.close();
     out.close();
