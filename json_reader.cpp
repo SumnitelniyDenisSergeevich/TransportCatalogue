@@ -27,11 +27,13 @@ void JsonReader::FillRenderSettings(renderer::MapRender& map) const {
 	auto underlayer_color = render_settings.at("underlayer_color"s);
 	if (underlayer_color.IsArray()) {
 		json::Array color = underlayer_color.AsArray();
-		if (color.size() == 3) {
-			map.SetUnderLayerColor(svg::Rgb{ static_cast<uint8_t>(color[0].AsInt()), static_cast<uint8_t>(color[1].AsInt()), static_cast<uint8_t>(color[2].AsInt()) });
+		if (color.size() == 3U) {
+			map.SetUnderLayerColor(svg::Rgb{ static_cast<uint8_t>(color[0].AsInt()), static_cast<uint8_t>(color[1].AsInt()),
+				static_cast<uint8_t>(color[2].AsInt()) });
 		}
 		else {
-			map.SetUnderLayerColor(svg::Rgba{ static_cast<uint8_t>(color[0].AsInt()), static_cast<uint8_t>(color[1].AsInt()), static_cast<uint8_t>(color[2].AsInt()), color[3].AsDouble() });
+			map.SetUnderLayerColor(svg::Rgba{ static_cast<uint8_t>(color[0].AsInt()), static_cast<uint8_t>(color[1].AsInt()),
+				static_cast<uint8_t>(color[2].AsInt()), color[3].AsDouble() });
 		}
 	}
 	else {
@@ -44,11 +46,13 @@ void JsonReader::FillRenderSettings(renderer::MapRender& map) const {
 		svg::Color color;
 		if (color_node.IsArray()) {
 			json::Array color_arr = color_node.AsArray();
-			if (color_arr.size() == 3) {
-				color = svg::Rgb{ static_cast<uint8_t>(color_arr[0].AsInt()), static_cast<uint8_t>(color_arr[1].AsInt()), static_cast<uint8_t>(color_arr[2].AsInt()) };
+			if (color_arr.size() == 3U) {
+				color = svg::Rgb{ static_cast<uint8_t>(color_arr[0].AsInt()), static_cast<uint8_t>(color_arr[1].AsInt()),
+					static_cast<uint8_t>(color_arr[2].AsInt()) };
 			}
 			else {
-				color = svg::Rgba{ static_cast<uint8_t>(color_arr[0].AsInt()), static_cast<uint8_t>(color_arr[1].AsInt()), static_cast<uint8_t>(color_arr[2].AsInt()) , color_arr[3].AsDouble() };
+				color = svg::Rgba{ static_cast<uint8_t>(color_arr[0].AsInt()), static_cast<uint8_t>(color_arr[1].AsInt()),
+					static_cast<uint8_t>(color_arr[2].AsInt()) , color_arr[3].AsDouble() };
 			}
 		}
 		else {
@@ -115,7 +119,7 @@ json::Node JsonReader::GetStatStop(const json::Node& stop_node) const {
 			result["buses"s] = json::Node{ json_buses };
 		}
 	}
-	return json::Node{ result };
+	return result;
 }
 
 json::Node JsonReader::GetStatRoute(const json::Node& route_node) const {
@@ -133,7 +137,7 @@ json::Node JsonReader::GetStatRoute(const json::Node& route_node) const {
 		result["stop_count"s] = json::Node{ static_cast<int>(rout_info->rout_stops_count) };
 		result["unique_stop_count"s] = json::Node{ static_cast<int>(rout_info->unic_rout_stop_count) };
 	}
-	return json::Node{ result };
+	return result;
 }
 
 json::Node JsonReader::GetRoute(const json::Node& route_node) const {			//new

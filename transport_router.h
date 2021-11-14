@@ -5,12 +5,22 @@
 
 using namespace graph;
 
+struct RouteSettings {
+    inline static size_t bus_wait_time;
+    inline static double bus_velocity;
+};
+
 class TransportRouter {
 public:
     TransportRouter(size_t vertex_count) : graph_(vertex_count) {
 
     }
-    void FillGraph(const transport_catalogue::TransportCatalogue& catalogue);
+    double ComputeTravelTime(double distance);
+    void AddEdge(const transport_catalogue::TransportCatalogue& catalogue, const std::vector<const Stop*> bus_stops,
+        size_t stop_id_from, size_t stop_id_to, const Bus& bus);
+
+    void FillVertexes(const std::deque<Stop>& stops);
+    void FillGraphWithRoutes(const transport_catalogue::TransportCatalogue& catalogue);
     void SetRouteSettings(const double velocity, const int bus_wait_time);
     void SetRouter(const Router<double>& router);
 

@@ -1,20 +1,36 @@
 #include "transport_router.h"
 
+double TransportRouter::ComputeTravelTime(double distance) {
+    return distance / route_settings_.bus_velocity * 60.0 + route_settings_.bus_wait_time;
+}
 
-void TransportRouter::FillGraph(const transport_catalogue::TransportCatalogue& catalogue) {
+void TransportRouter::FillVertexes(const std::deque<Stop>& stops) {
     size_t counter = 0;
-    for (const auto& stop : catalogue.GetStops()) {
+    for (const auto& stop : stops) {
         stop_id_[stop.name] = counter;
         id_stop_[counter] = stop.name;
         ++counter;
     }
+}
+
+void TransportRouter::AddEdge(const transport_catalogue::TransportCatalogue& catalogue, const std::vector<const Stop*> bus_stops,
+                                size_t stop_id_from, size_t stop_id_to, const Bus& bus) {
+    auto [dist, span_count] = catalogue.GetDistAndSpanCountBetweenStopsInRoute(bus_stops, stop_id_from, stop_id_to);
+    graph_.AddEdge(graph::Edge<double>{ stop_id_.at(bus_stops[stop_id_from]->name),
+        stop_id_.at(bus_stops[stop_id_to]->name),
+        ComputeTravelTime(dist),
+        bus.name,
+        span_count});
+}
+
+void TransportRouter::FillGraphWithRoutes(const transport_catalogue::TransportCatalogue& catalogue) {
     const std::deque<Bus> buses = catalogue.GetBuses();
     for (const Bus& bus : buses) {
         const std::vector<const Stop*> bus_stops = bus.bus_stops;
         if (bus.circle_key) {
             for (size_t i = 0; i < bus_stops.size(); ++i) {
                 if (i) {
-                    auto [dist, span_count] = catalogue.GetDistAndSpanCountBetweenStopsInRoute(bus, i, 0, true);
+                    auto [dist, span_count] = catalogue.GetDistAndSpanCountBetweenStopsInRoute(bus_stops, i, 0, true);
                     graph_.AddEdge(graph::Edge<double>{ stop_id_.at(bus_stops[i]->name),
                         stop_id_.at(bus_stops[0]->name),
                         dist / route_settings_.bus_velocity * 60.0 + route_settings_.bus_wait_time,
@@ -22,10 +38,10 @@ void TransportRouter::FillGraph(const transport_catalogue::TransportCatalogue& c
                         span_count});
                 }
                 for (size_t j = i + 1; j < bus_stops.size(); ++j) {
-                    auto [dist, span_count] = catalogue.GetDistAndSpanCountBetweenStopsInRoute(bus, i, j);
+                    auto [dist, span_count] = catalogue.GetDistAndSpanCountBetweenStopsInRoute(bus_stops, i, j);
                     graph_.AddEdge(graph::Edge<double>{ stop_id_.at(bus_stops[i]->name),
                         stop_id_.at(bus_stops[j]->name),
-                        dist / route_settings_.bus_velocity * 60.0 + route_settings_.bus_wait_time,
+                        ComputeTravelTime(dist),
                         bus.name,
                         span_count});
                 }
@@ -35,10 +51,10 @@ void TransportRouter::FillGraph(const transport_catalogue::TransportCatalogue& c
             for (size_t i = 0; i < bus_stops.size(); ++i) {
                 for (size_t j = 0; j < bus_stops.size(); ++j) {
                     if (i != j) {
-                        auto [dist, span_count] = catalogue.GetDistAndSpanCountBetweenStopsInRoute(bus, i, j);
+                        auto [dist, span_count] = catalogue.GetDistAndSpanCountBetweenStopsInRoute(bus_stops, i, j);
                         graph_.AddEdge(graph::Edge<double>{ stop_id_.at(bus_stops[i]->name),
                             stop_id_.at(bus_stops[j]->name),
-                            dist / route_settings_.bus_velocity * 60.0 + route_settings_.bus_wait_time,
+                            ComputeTravelTime(dist),
                             bus.name,
                             span_count});
                     }

@@ -8,7 +8,6 @@
 #include <string>
 #include <vector>
 
-
 namespace transport_catalogue {
 	class StopHasher {
 	public:
@@ -35,7 +34,7 @@ namespace transport_catalogue {
 		size_t GetStopsCount() const;
 		const std::deque<Bus>& GetBuses() const;
 		const std::deque<Stop>& GetStops() const;
-		std::pair<double,size_t> GetDistAndSpanCountBetweenStopsInRoute(const Bus& route, const size_t from, const size_t to, bool last_ring = false) const;
+		std::pair<double, size_t> GetDistAndSpanCountBetweenStopsInRoute(const std::vector<const Stop*>& route, const size_t from, const size_t to, bool last_ring = false) const;
 
 		size_t UnicStopsCount(const std::string& bus_name) const;
 	private:

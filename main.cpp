@@ -13,11 +13,6 @@ using namespace renderer;
 
 using namespace std;
 
-struct Waight {
-    static size_t bus_wait_time;
-    optional<size_t> bus_travel_time;
-};
-
 int main() {
     std::ifstream in("requests.json"s);
     std::ofstream out("result.json"s);
@@ -25,20 +20,21 @@ int main() {
     TransportCatalogue catalogue;
     MapRender map;
     RequestHandler request_handler(catalogue, map);
-    JsonReader json_reader(сin, request_handler);
+    JsonReader json_reader(in, request_handler);
 
 
     json_reader.FillCatalogue(catalogue);
 
     TransportRouter transport_router(catalogue.GetStopsCount());
     json_reader.FillRouteSettings(transport_router);
-    transport_router.FillGraph(catalogue);
+    transport_router.FillVertexes(catalogue.GetStops());
+    transport_router.FillGraphWithRoutes(catalogue);
     graph::Router router(transport_router.GetGraph());
     transport_router.SetRouter(router);
     json_reader.SetTransportRouter(transport_router);
 
     json_reader.FillRenderSettings(map);
-    json_reader.PrintRequestsAnswer(сout);
+    json_reader.PrintRequestsAnswer(out);
 
     in.close();
     out.close();

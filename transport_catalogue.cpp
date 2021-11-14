@@ -89,36 +89,36 @@ namespace transport_catalogue {
 		return geo::ComputeDistance(from->coordinates, to->coordinates);
 	}
 
-	pair<double,size_t> TransportCatalogue::GetDistAndSpanCountBetweenStopsInRoute(const Bus& route, const size_t from, const size_t to, bool last_ring) const {
-		auto route_stops = route.bus_stops;
-		auto iter1 = route_stops.begin() + from;
-		auto iter2 = route_stops.begin() + to;
+	pair<double, size_t> TransportCatalogue::GetDistAndSpanCountBetweenStopsInRoute(const std::vector<const Stop*>& route_stops,
+																	const size_t from, const size_t to, bool last_ring) const {
+		auto station_from = route_stops.begin() + from;
+		auto station_to = route_stops.begin() + to;
 		double dist = 0.0;
 		size_t span_count = 0;
 
 		if (last_ring) {
-			for (; iter1+1 < route_stops.end(); ++iter1) {
-				dist += GetDistanceBetweenStops(*iter1, *next(iter1, 1));
+			for (; station_from + 1 < route_stops.end(); ++station_from) {
+				dist += GetDistanceBetweenStops(*station_from, *next(station_from, 1));
 				++span_count;
 			}
-			dist += GetDistanceBetweenStops(*iter1, *route_stops.begin());
+			dist += GetDistanceBetweenStops(*station_from, *route_stops.begin());
 			++span_count;
-			return { dist/1000.0, span_count };
+			return { dist / 1000.0, span_count };
 		}
 
-		if (iter1 < iter2) {
-			for (; iter1 < iter2; ++iter1) {
-				dist += GetDistanceBetweenStops(*iter1, *next(iter1, 1));
+		if (station_from < station_to) {
+			for (; station_from < station_to; ++station_from) {
+				dist += GetDistanceBetweenStops(*station_from, *next(station_from, 1));
 				++span_count;
 			}
 		}
-		else if (iter1 > iter2) {
-			for (; iter1 > iter2; --iter1) {
-				dist += GetDistanceBetweenStops(*iter1, *next(iter1, -1));
+		else if (station_from > station_to) {
+			for (; station_from > station_to; --station_from) {
+				dist += GetDistanceBetweenStops(*station_from, *next(station_from, -1));
 				++span_count;
 			}
 		}
-		return { dist/1000.0,span_count };
+		return { dist / 1000.0, span_count };
 	}
 
 	size_t TransportCatalogue::UnicStopsCount(const string& bus_name) const {
