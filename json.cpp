@@ -12,7 +12,7 @@ namespace json {
         throw logic_error("its not array"s);
     }
     const Dict& Node::AsMap() const {
-        if (IsMap()) {
+        if (IsDict()) {
             return get<Dict>(*this);
         }
         throw logic_error("its not dict"s);
@@ -67,7 +67,7 @@ namespace json {
     bool Node::IsArray() const {
         return holds_alternative<Array>(*this);
     }
-    bool Node::IsMap() const {
+    bool Node::IsDict() const {
         return holds_alternative<Dict>(*this);
     }
 

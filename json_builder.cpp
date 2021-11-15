@@ -4,15 +4,15 @@ using namespace std::literals;
 
 namespace json {
 	KeyItemContext Builder::Key(std::string key) {
-		if (ready_object_) { // questions
-			throw std::logic_error("Object is already ready"s);
+		if (ready_object_) {
+			throw std::logic_error("the object is already ready"s);
 		}
 		if (nodes_stack_.empty()) {
-			throw std::logic_error("Metod Key snaruji slovarya"s);
+			throw std::logic_error("the Key method outside the dictionary"s);
 		}
 		else {
-			if (!nodes_stack_.back()->IsMap()) {
-				throw std::logic_error("Metod Key snaruji slovarya"s);
+			if (!nodes_stack_.back()->IsDict()) {
+				throw std::logic_error("the Key method outside the dictionary"s);
 			}
 		}
 		keys_.push_back(key);
@@ -27,76 +27,16 @@ namespace json {
 		if (!nodes_stack_.empty()) {
 			if (nodes_stack_.back()->IsArray()) {
 				Array& ar = const_cast<Array&>(nodes_stack_.back()->AsArray());
-				if (std::holds_alternative<nullptr_t>(value)) {
-					ar.push_back(Node{ std::move(std::get<nullptr_t>(value)) });
-				}
-				else if (std::holds_alternative<Array>(value)) {
-					ar.push_back(Node{ std::move(std::get<Array>(value)) });
-				}
-				else if (std::holds_alternative<Dict>(value)) {
-					ar.push_back(Node{ std::move(std::get<Dict>(value)) });
-				}
-				else if (std::holds_alternative<bool>(value)) {
-					ar.push_back(Node{ std::move(std::get<bool>(value)) });
-				}
-				else if (std::holds_alternative<int>(value)) {
-					ar.push_back(Node{ std::move(std::get<int>(value)) });
-				}
-				else if (std::holds_alternative<double>(value)) {
-					ar.push_back(Node{ std::move(std::get<double>(value)) });
-				}
-				else if (std::holds_alternative<std::string>(value)) {
-					ar.push_back(Node{ std::move(std::get<std::string>(value)) });
-				}
+				ar.push_back(Node{ std::move(value) });
 			}
-			else if (nodes_stack_.back()->IsMap()) {
+			else if (nodes_stack_.back()->IsDict()) {
 				Dict& dict = const_cast<Dict&>(nodes_stack_.back()->AsMap());
-				if (std::holds_alternative<nullptr_t>(value)) {
-					dict[keys_.back()] = Node{ std::move(std::get<nullptr_t>(value)) };
-				}
-				else if (std::holds_alternative<Array>(value)) {
-					dict[keys_.back()] = Node{ std::move(std::get<Array>(value)) };
-				}
-				else if (std::holds_alternative<Dict>(value)) {
-					dict[keys_.back()] = Node{ std::move(std::get<Dict>(value)) };
-				}
-				else if (std::holds_alternative<bool>(value)) {
-					dict[keys_.back()] = Node{ std::move(std::get<bool>(value)) };
-				}
-				else if (std::holds_alternative<int>(value)) {
-					dict[keys_.back()] = Node{ std::move(std::get<int>(value)) };
-				}
-				else if (std::holds_alternative<double>(value)) {
-					dict[keys_.back()] = Node{ std::move(std::get<double>(value)) };
-				}
-				else if (std::holds_alternative<std::string>(value)) {
-					dict[keys_.back()] = Node{ std::move(std::get<std::string>(value)) };
-				}
+				dict[keys_.back()] = Node{ std::move(value) };
 				keys_.pop_back();
 			}
 		}
 		else {
-			if (std::holds_alternative<nullptr_t>(value)) {
-				root_ = Node(std::move(std::get<nullptr_t>(value)));
-			}
-			else if (std::holds_alternative<Array>(value)) {
-				root_ =  Node(std::move(std::get<Array>(value)));
-			}
-			else if (std::holds_alternative<Dict>(value)) {
-				root_ =  Node(std::move(std::get<Dict>(value)));
-			}
-			else if (std::holds_alternative<bool>(value)) {
-				root_ = Node(std::move(std::get<bool>(value)));
-			}
-		    else if (std::holds_alternative<int>(value)) {
-				root_ = Node(std::move(std::get<int>(value)));
-			}
-			else if (std::holds_alternative<double>(value)) {
-				root_ = Node(std::move(std::get<double>(value)));
-			}
-			else if (std::holds_alternative<std::string>(value)) {
-				root_ = Node(std::move(std::get<std::string>(value)));
-			}
+			root_ = Node{ std::move(value) };
 			ready_object_ = true;
 		}
 		return *this;
@@ -129,7 +69,7 @@ namespace json {
 		if (nodes_stack_.empty()) {
 			throw std::logic_error("Not the End of Dict"s);
 		}
-		else if (!nodes_stack_.back()->IsMap()) {
+		else if (!nodes_stack_.back()->IsDict()) {
 			throw std::logic_error("Not the End of Dict"s);
 		}
 		Node* node = nodes_stack_.back();
@@ -139,7 +79,7 @@ namespace json {
 				Array& ar = const_cast<Array&>(nodes_stack_.back()->AsArray());
 				ar.push_back(*node);
 			}
-			else if (nodes_stack_.back()->IsMap()) {
+			else if (nodes_stack_.back()->IsDict()) {
 				Dict& dict = const_cast<Dict&>(nodes_stack_.back()->AsMap());
 				dict[keys_.back()] = *node;
 			}
@@ -169,7 +109,7 @@ namespace json {
 				Array& ar = const_cast<Array&>(nodes_stack_.back()->AsArray());
 				ar.push_back(*node);
 			}
-			else if (nodes_stack_.back()->IsMap()) {
+			else if (nodes_stack_.back()->IsDict()) {
 				Dict& dict = const_cast<Dict&>(nodes_stack_.back()->AsMap());
 				dict[keys_.back()] = *node;
 			}
