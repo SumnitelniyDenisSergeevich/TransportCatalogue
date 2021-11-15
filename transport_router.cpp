@@ -13,6 +13,16 @@ void TransportRouter::FillVertexes() {
     }
 }
 
+void TransportRouter::AddEdge(const Bus& bus, size_t from, size_t to, bool last_ring) {
+    const std::vector<const Stop*> bus_stops = bus.bus_stops;
+    auto [dist, span_count] = GetDistAndSpanCountBetweenStopsInRoute(bus_stops, from, to, last_ring);
+    graph_.AddEdge(graph::Edge<double>{ stop_id_.at(bus_stops[from]->name),
+        stop_id_.at(bus_stops[to]->name),
+        ComputeTravelTime(dist),
+        bus.name,
+        span_count});
+}
+
 void TransportRouter::FillGraphWithRoutes() {
     const std::deque<Bus> buses = catalogue_.GetBuses();
     for (const Bus& bus : buses) {
@@ -20,20 +30,10 @@ void TransportRouter::FillGraphWithRoutes() {
         if (bus.circle_key) {
             for (size_t i = 0; i < bus_stops.size(); ++i) {
                 if (i) {
-                    auto [dist, span_count] = GetDistAndSpanCountBetweenStopsInRoute(bus_stops, i, 0, true);
-                    graph_.AddEdge(graph::Edge<double>{ stop_id_.at(bus_stops[i]->name),
-                        stop_id_.at(bus_stops[0]->name),
-                        ComputeTravelTime(dist),
-                        bus.name,
-                        span_count});
+                    AddEdge(bus, i, 0, true);
                 }
                 for (size_t j = i + 1; j < bus_stops.size(); ++j) {
-                    auto [dist, span_count] = GetDistAndSpanCountBetweenStopsInRoute(bus_stops, i, j);
-                    graph_.AddEdge(graph::Edge<double>{ stop_id_.at(bus_stops[i]->name),
-                        stop_id_.at(bus_stops[j]->name),
-                        ComputeTravelTime(dist),
-                        bus.name,
-                        span_count});
+                    AddEdge(bus, i, j);
                 }
             }
         }
@@ -41,12 +41,7 @@ void TransportRouter::FillGraphWithRoutes() {
             for (size_t i = 0; i < bus_stops.size(); ++i) {
                 for (size_t j = 0; j < bus_stops.size(); ++j) {
                     if (i != j) {
-                        auto [dist, span_count] = GetDistAndSpanCountBetweenStopsInRoute(bus_stops, i, j);
-                        graph_.AddEdge(graph::Edge<double>{ stop_id_.at(bus_stops[i]->name),
-                            stop_id_.at(bus_stops[j]->name),
-                            ComputeTravelTime(dist),
-                            bus.name,
-                            span_count});
+                        AddEdge(bus, i, j);
                     }
                 }
             }

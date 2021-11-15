@@ -21,6 +21,8 @@ public:
     void FillGraphWithRoutes();
     void SetRouteSettings(const double velocity, const int bus_wait_time);
     void SetRouter(const Router<double>& router);
+    
+    void AddEdge(const Bus& bus, size_t from, size_t to, bool last_ring = false);
 
     const DirectedWeightedGraph<double>& GetGraph() const;
     VertexId GetVertexId(std::string_view stop) const;
