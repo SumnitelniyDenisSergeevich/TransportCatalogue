@@ -30,9 +30,10 @@ int main() {
     json_reader.FillRouteSettings(transport_router);
     transport_router.FillVertexes();
     transport_router.FillGraphWithRoutes();
-    request_handler.SetTransportRouter(transport_router);
     graph::Router router(transport_router.GetGraph());
     transport_router.SetRouter(router);
+    request_handler.SetTransportRouter(transport_router);
+    json_reader.SetTransportRouter(transport_router);
 
 
     json_reader.FillRenderSettings(map);

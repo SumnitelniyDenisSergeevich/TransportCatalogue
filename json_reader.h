@@ -12,6 +12,7 @@ public:
 	void FillRenderSettings(renderer::MapRender& map) const;
 	void FillRouteSettings(TransportRouter&)const;
 	void PrintRequestsAnswer(std::ostream& out) const;
+	void SetTransportRouter(const TransportRouter& t_router);
 	const json::Dict& GetRequests() const;
 private:
 	json::Node GetStatStop(const json::Node& stop_node) const;
@@ -20,6 +21,7 @@ private:
 
 	json::Document doc_;
 	RequestHandler& rh_;
+	const TransportRouter* t_router_ = nullptr;
 };
 
 

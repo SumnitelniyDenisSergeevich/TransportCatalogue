@@ -6,7 +6,7 @@
 using namespace std;
 
 namespace transport_catalogue {
-	void TransportCatalogue::AddRoute( Bus& bus, const vector<string> stops) {
+	void TransportCatalogue::AddRoute( Bus& bus, const vector<string>& stops) {
 		buses_.push_back(move(bus));
 		for (const auto& stop : stops) {
 			for (const auto& busstop : stops_) {
@@ -36,7 +36,7 @@ namespace transport_catalogue {
 	}
 
 	RouteInfo TransportCatalogue::GetRouteInfo(const string& bus_name) const {
-		::RouteInfo rout_info;
+		RouteInfo rout_info;
 		const Bus* bus = FindRoute(bus_name);
 		if (!bus) {
 			throw invalid_argument("bus is not found"s);
@@ -45,14 +45,15 @@ namespace transport_catalogue {
 		rout_info.unic_rout_stop_count = UnicStopsCount(bus_name);
 		double route_length = 0.0;
 		double geographical_distance = 0.0;
-		for (auto iter = bus->bus_stops.begin(); iter + 1 != bus->bus_stops.end(); ++iter) {
+		for (auto stop_from = bus->bus_stops.begin(); stop_from + 1 != bus->bus_stops.end(); ++stop_from) {
+			auto stop_to = next(stop_from, 1);
 			if (bus->circle_key) {
-				route_length += GetDistanceBetweenStops((*iter), (*(iter + 1)));
-				geographical_distance += geo::ComputeDistance((*iter)->coordinates, (*(iter + 1))->coordinates);
+				route_length += GetDistanceBetweenStops(*stop_from, *stop_to);
+				geographical_distance += geo::ComputeDistance((*stop_from)->coordinates, (*stop_to)->coordinates);
 			}
 			else {
-				route_length += GetDistanceBetweenStops((*iter), (*(iter + 1))) + GetDistanceBetweenStops((*(iter + 1)), (*iter));
-				geographical_distance += geo::ComputeDistance((*iter)->coordinates, (*(iter + 1))->coordinates) * 2;
+				route_length += GetDistanceBetweenStops(*stop_from, *stop_to) + GetDistanceBetweenStops(*stop_to, *stop_from);
+				geographical_distance += geo::ComputeDistance((*stop_from)->coordinates, (*stop_to)->coordinates) * 2;
 			}
 		}
 		if (bus->circle_key) {
@@ -112,4 +113,4 @@ namespace transport_catalogue {
 	const std::deque<Stop>& TransportCatalogue::GetStops() const {
 		return stops_;
 	}
-}
+} // transport_catalogue

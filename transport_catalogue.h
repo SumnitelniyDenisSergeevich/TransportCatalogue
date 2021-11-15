@@ -18,7 +18,7 @@ namespace transport_catalogue {
 	using DistFromTo = std::unordered_map<const Stop*, std::unordered_map<const Stop*, uint32_t, StopHasher>, StopHasher>;
 	class TransportCatalogue {
 	public:
-		void AddRoute(Bus& bus, const std::vector<std::string> stops);
+		void AddRoute(Bus& bus, const std::vector<std::string>& stops);
 		void AddStop(const Stop& stop);
 
 		const Bus* FindRoute(const std::string& bus_name) const;

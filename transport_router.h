@@ -30,8 +30,9 @@ public:
     const Edge<double>& GetEdge(EdgeId edge_id) const;
     size_t GetBusWaitTime() const;
 
-    std::pair<double, size_t> GetDistAndSpanCountBetweenStopsInRoute(const std::vector  <const Stop*>& route_stops, const size_t from, const size_t to,
-                                                    bool last_ring = false) const;
+    std::pair<double, size_t> GetDistAndSpanCountBetweenStopsInRoute(const std::vector<const Stop*>& route_stops,
+                                                                     const size_t from, const size_t to,
+                                                                     bool last_ring = false) const;
 
     std::optional<Router<double>::RouteInfo> BuildRoute(VertexId from, VertexId to) const;
 

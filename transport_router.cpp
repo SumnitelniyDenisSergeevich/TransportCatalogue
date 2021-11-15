@@ -27,18 +27,16 @@ void TransportRouter::FillGraphWithRoutes() {
     const std::deque<Bus> buses = catalogue_.GetBuses();
     for (const Bus& bus : buses) {
         const std::vector<const Stop*> bus_stops = bus.bus_stops;
-        if (bus.circle_key) {
-            for (size_t i = 0; i < bus_stops.size(); ++i) {
-                if (i) {
+        for (size_t i = 0; i < bus_stops.size(); ++i) {
+            if (bus.circle_key) {
+                if (i != 0) {
                     AddEdge(bus, i, 0, true);
                 }
                 for (size_t j = i + 1; j < bus_stops.size(); ++j) {
                     AddEdge(bus, i, j);
                 }
             }
-        }
-        else {
-            for (size_t i = 0; i < bus_stops.size(); ++i) {
+            else {
                 for (size_t j = 0; j < bus_stops.size(); ++j) {
                     if (i != j) {
                         AddEdge(bus, i, j);
