@@ -1,6 +1,7 @@
 #pragma once
 
 #include "json.h"
+#include <type_traits>
 
 namespace json {
 	class Builder {
@@ -17,6 +18,10 @@ namespace json {
 		Node Build();
 		KeyItemContext Key(std::string);
 	private:
+		template<typename ItemContext, typename ContainerType>
+		ItemContext StartContainer();
+		template<typename ContainerType>
+		Builder& EndContainer();
 
 		class BaseContext {
 		public:
@@ -78,4 +83,53 @@ namespace json {
 		std::vector<std::string> keys_;
 		bool ready_object_ = false;
 	};
+
+	template<typename ItemContext, typename ContainerType>
+	ItemContext Builder::StartContainer() {
+		if (ready_object_) {
+			throw std::logic_error("Object is already ready"s);
+		}
+		ContainerType container;
+		nodes_stack_.push_back(new Node{ container });
+		ItemContext item_context{ *this };
+		return item_context;
+	}
+
+	template<typename ContainerType>
+	Builder& Builder::EndContainer() {
+		if (ready_object_) {
+			throw std::logic_error("Object is already ready"s);
+		}
+		if (nodes_stack_.empty()) {
+			throw std::logic_error("Not the end of container"s);
+		}
+		if constexpr (std::is_same_v< ContainerType, Dict>) {
+			if (!nodes_stack_.back()->IsDict()) {
+				throw std::logic_error("Not the end of Dict"s);
+			}
+		}else if constexpr (std::is_same_v< ContainerType, Array>) {
+			if (!nodes_stack_.back()->IsArray()) {
+				throw std::logic_error("Not the end of Array"s);
+			}
+		}
+		Node* node = nodes_stack_.back();
+		nodes_stack_.pop_back();
+		if (!nodes_stack_.empty()) {
+			if (nodes_stack_.back()->IsArray()) {
+				Array& ar = const_cast<Array&>(nodes_stack_.back()->AsArray());
+				ar.push_back(*node);
+			}
+			else if (nodes_stack_.back()->IsDict()) {
+				Dict& dict = const_cast<Dict&>(nodes_stack_.back()->AsMap());
+				dict[keys_.back()] = *node;
+			}
+		}
+		else {
+			ready_object_ = true;
+		}
+		root_ = *node;
+		delete node;
+		return *this;
+	}
+
 }// namespace json
