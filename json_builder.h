@@ -23,6 +23,19 @@ namespace json {
 		bool ready_object_ = false;
 	};
 
+	class BaseContext {
+	public: 
+		BaseContext(Builder& build) : builder_(build) {
+		}
+		DictItemContext StartDict();
+		ArrayItemContext StartArray();
+		Builder& EndArray();
+		KeyItemContext Key(std::string str);
+		Builder& EndDict();
+	private:
+		Builder& builder_;
+	};
+
 	class ValueKeyContext {// value следующий за key
 	public:
 		ValueKeyContext(Builder& build) : builder_(build) {
@@ -33,35 +46,34 @@ namespace json {
 		Builder& builder_;
 	};
 
-	class KeyItemContext {
+	class KeyItemContext : public BaseContext {
 	public:
-		KeyItemContext(Builder& build) : builder_(build) {
+		KeyItemContext(Builder& build) : BaseContext(build), builder_(build){
 		}
 		ValueKeyContext Value(Node::Value val);
-		DictItemContext StartDict();
-		ArrayItemContext StartArray();
+
+		Builder& EndArray() = delete;
+		KeyItemContext Key(std::string str) = delete;
+		Builder& EndDict() = delete;
 	private:
 		Builder& builder_;
 	};
 
-	class DictItemContext {
+	class DictItemContext : public BaseContext {
 	public:
-		DictItemContext(Builder& build) : builder_(build) {
-		}
-		KeyItemContext Key(std::string str);
-		Builder& EndDict();
-	private:
-		Builder& builder_;
+		DictItemContext StartDict() = delete;
+		ArrayItemContext& StartArray() = delete;
+		Builder& EndArray() = delete;
 	};
 
-	class ArrayItemContext {
+	class ArrayItemContext : public BaseContext {
 	public:
-		ArrayItemContext(Builder& build) : builder_(build) {
+		ArrayItemContext(Builder& build) : BaseContext(build), builder_(build){
 		}
 		ArrayItemContext& Value(Node::Value val);
-		DictItemContext StartDict();
-		ArrayItemContext& StartArray();
-		Builder& EndArray();
+
+		KeyItemContext Key(std::string str) = delete;
+		Builder& EndDict() = delete;
 	private:
 		Builder& builder_;
 	};
