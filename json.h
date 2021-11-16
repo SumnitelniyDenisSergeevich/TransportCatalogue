@@ -36,8 +36,8 @@ namespace json {
         using variant::variant;
         using Value = variant;
 
-        Node(Value&& value) {
-            SetValue() = value;
+        Value& operator*() {
+            return *this;
         }
 
         const Array& AsArray() const;
@@ -59,10 +59,6 @@ namespace json {
 
         bool operator==(const Node node) const;
         bool operator!=(const Node node) const;
-    private:
-        Value& SetValue() {
-            return *this;
-        }
     };
 
     class Document {

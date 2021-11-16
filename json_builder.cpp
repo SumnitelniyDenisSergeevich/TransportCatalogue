@@ -24,19 +24,23 @@ namespace json {
 		if (ready_object_) {
 			throw std::logic_error("Object is already ready"s);
 		}
+		Node node;
 		if (!nodes_stack_.empty()) {
 			if (nodes_stack_.back()->IsArray()) {
 				Array& ar = const_cast<Array&>(nodes_stack_.back()->AsArray());
-				ar.push_back(Node{ std::move(value) });
+				*node = value;
+				ar.push_back(std::move(node));
 			}
 			else if (nodes_stack_.back()->IsDict()) {
 				Dict& dict = const_cast<Dict&>(nodes_stack_.back()->AsMap());
-				dict[keys_.back()] = Node{ std::move(value) };
+				*node = value;
+				dict[keys_.back()] = std::move(node);
 				keys_.pop_back();
 			}
 		}
 		else {
-			root_ = Node{ std::move(value) };
+			*node = value;
+			root_ = std::move(node);
 			ready_object_ = true;
 		}
 		return *this;
