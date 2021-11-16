@@ -32,6 +32,8 @@ namespace json {
 			Builder& EndArray();
 			KeyItemContext Key(std::string str);
 			Builder& EndDict();
+		protected:
+			~BaseContext() = default; //polymorphic deletion of descendant classes via a pointer to the base class is not required.
 		private:
 			Builder& builder_;
 		};
