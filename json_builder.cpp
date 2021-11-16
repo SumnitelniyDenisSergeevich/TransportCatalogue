@@ -3,7 +3,7 @@
 using namespace std::literals;
 
 namespace json {
-	KeyItemContext Builder::Key(std::string key) {
+	Builder::KeyItemContext Builder::Key(std::string key) {
 		if (ready_object_) {
 			throw std::logic_error("the object is already ready"s);
 		}
@@ -42,7 +42,7 @@ namespace json {
 		return *this;
 	}
 
-	DictItemContext Builder::StartDict() {
+	Builder::DictItemContext Builder::StartDict() {
 		if (ready_object_) {
 			throw std::logic_error("Object is already ready"s);
 		}
@@ -52,7 +52,7 @@ namespace json {
 		return dictan;
 	}
 
-	ArrayItemContext Builder::StartArray() {
+	Builder::ArrayItemContext Builder::StartArray() {
 		if (ready_object_) {
 			throw std::logic_error("Object is already ready"s);
 		}
@@ -128,39 +128,39 @@ namespace json {
 		return root_;
 	}
 
-	KeyItemContext ValueKeyContext::Key(std::string str) {
+	Builder::KeyItemContext  Builder::ValueKeyContext::Key(std::string str) {
 		return builder_.Key(str);
 	}
 
-	Builder& ValueKeyContext::EndDict() {
+	Builder& Builder::ValueKeyContext::EndDict() {
 		return builder_.EndDict();
 	}
 
-	ArrayItemContext& ArrayItemContext::Value(Node::Value val) {
+	Builder::ArrayItemContext& Builder::ArrayItemContext::Value(Node::Value val) {
 		builder_.Value(val);
 		return *this;
 	}
 
-	ValueKeyContext KeyItemContext::Value(Node::Value val) {
+	Builder::ValueKeyContext Builder::KeyItemContext::Value(Node::Value val) {
 		builder_.Value(val);
 		ValueKeyContext val_con{ builder_ };
 		return val_con;
 	}
 
-	DictItemContext BaseContext::StartDict() {
+	Builder::DictItemContext Builder::BaseContext::StartDict() {
 		return builder_.StartDict();
 	}
-	ArrayItemContext BaseContext::StartArray() {
+	Builder::ArrayItemContext Builder::BaseContext::StartArray() {
 		return builder_.StartArray();
 	}
-	Builder& BaseContext::EndArray() {
+	Builder& Builder::BaseContext::EndArray() {
 		builder_.EndArray();
 		return builder_;
 	}
-	KeyItemContext BaseContext::Key(std::string str) {
+	Builder::KeyItemContext Builder::BaseContext::Key(std::string str) {
 		return builder_.Key(str);
 	}
-	Builder& BaseContext::EndDict() {
+	Builder& Builder::BaseContext::EndDict() {
 		builder_.EndDict();
 		return builder_;
 	}
