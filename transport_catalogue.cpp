@@ -3,6 +3,8 @@
 #include <stdexcept>
 #include <unordered_set>
 
+#include <iostream> //delete
+
 using namespace std;
 
 namespace transport_catalogue {
@@ -113,4 +115,5 @@ namespace transport_catalogue {
 	const std::deque<Stop>& TransportCatalogue::GetStops() const {
 		return stops_;
 	}
+
 } // transport_catalogue

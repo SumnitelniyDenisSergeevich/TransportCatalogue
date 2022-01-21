@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+import "map_renderer.proto";
+import "graph.proto";
+
+package transport_catalogue_serialization;
+
+message SerializationSettings {
+  string file_path = 1;
+}
+
+message StopsNameMap{
+  map<string, uint32> stop_name_id = 1;
+}
+
+message Bus{
+  bool is_roundtrip = 1;
+  string name = 2;
+  repeated uint32 stops_id = 3;
+}
+
+message Coordinates{
+  double lat = 1;
+  double lng = 2;
+}
+
+message RoadDistance{
+  uint32 stop_id = 1;
+  uint32 distance = 2;
+}
+
+message Stop{
+  Coordinates coordinates = 1;
+  uint32 name_id = 2;
+  repeated RoadDistance road_distance = 3;
+}
+
+message BaseRequests{
+  repeated Bus routes = 1;
+  repeated Stop stops = 2;
+  StopsNameMap stops_name_map = 3;
+}
+
+message TransportCatalogue{
+  RoutingSettings routing_settings = 1;
+  RenderSettings render_settings = 2;
+  BaseRequests base_requests = 3;
+}
