@@ -10,7 +10,7 @@ RequestHandler::RequestHandler(const transport_catalogue::TransportCatalogue& db
 svg::Document RequestHandler::RenderMap() const {
 	return renderer_.RenderSVG(db_);
 }
-
+//туть
 optional<RouteInfo> RequestHandler::GetBusStat(const string& bus_name) const {
 	if (db_.FindRoute(bus_name)) {
 		return db_.GetRouteInfo(bus_name);
