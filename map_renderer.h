@@ -20,9 +20,31 @@ namespace renderer {
 		void SetUnderLayerWidth(const double underlayer_width) noexcept;
 		void SetColorPalette(const std::vector<svg::Color>& color_palette) noexcept;
 
+		double GetWidth() const noexcept;
+		double GetHeight() const noexcept;
+		double GetPadding() const noexcept;
+		double GetLineWidth() const noexcept;
+		double GetStopRadius() const noexcept;
+		uint32_t GetBusLableFontSize() const noexcept;
+		std::pair<double, double> GetBusLableOffset() const noexcept;
+		uint32_t GetStopLableFontSize() const noexcept;
+		std::pair<double, double> GetStopLableOffset() const noexcept;
+		svg::Color GetUnderLayerColor() const noexcept;
+		double GetUnderLayerWidth() const noexcept;
+		const std::vector<svg::Color>& GetColorPalette() const noexcept;
+
 		svg::Document RenderSVG(const transport_catalogue::TransportCatalogue& db_) const;
 	private:
-		void DrawText(svg::Text& text, svg::Text& podlojka) const;
+		struct ScaleSettings {
+			double zoom_coef = 0.0;
+			double min_lat = 0.0;
+			double max_lat = 0.0;
+			double min_lon = 0.0;
+			double max_lon = 0.0;
+		};
+		void DrawLines(const std::map<std::string_view, const Bus*>&, const ScaleSettings&, svg::Document& result) const;
+		void DrawText(const std::map<std::string_view, const Bus*>& bus_name_to_bus, const ScaleSettings& scale_settings, svg::Document& result) const;
+		void DrawTextObject(svg::Text& text, svg::Text& podlojka) const;
 
 		double width_ = 0.0;
 		double height_ = 0.0;

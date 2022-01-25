@@ -2,23 +2,21 @@
 
 #include <stdexcept>
 #include <unordered_set>
-
-#include <iostream> //delete
-
 using namespace std;
 
 namespace transport_catalogue {
-	void TransportCatalogue::AddRoute( Bus& bus, const vector<string>& stops) {
+	void TransportCatalogue::AddRoute( Bus& bus) {
 		buses_.push_back(move(bus));
-		for (const auto& stop : stops) {
+		for (auto stop : buses_.back().bus_stops) {
 			for (const auto& busstop : stops_) {
-				if (busstop.name == stop) {
+				if (busstop.name == stop->name) {
 					stop_by_buses_[&busstop].insert(buses_.back().name);
 				}
 			}
 		}
 		busname_to_bus_[buses_.back().name] = &buses_.back();
 	}
+
 	void TransportCatalogue::AddStop(const Stop& stop) {
 		stops_.push_back(stop);
 		stopname_to_stop_[stops_.back().name] = &stops_.back();
@@ -30,6 +28,7 @@ namespace transport_catalogue {
 		}
 		return nullptr;
 	}
+
 	const Stop* TransportCatalogue::FindStop(const string& stop_name) const {
 		if (stopname_to_stop_.count(stop_name) != 0) {
 			return stopname_to_stop_.at(stop_name);
@@ -92,6 +91,10 @@ namespace transport_catalogue {
 		return geo::ComputeDistance(from->coordinates, to->coordinates);
 	}
 
+	DistFromTo TransportCatalogue::GetDistancesBetweenStops() const {
+		return from_to_dist_;
+	}
+
 	size_t TransportCatalogue::UnicStopsCount(const string& bus_name) const {
 		unordered_set<string_view> unic_bus_stops;
 		for (const auto& bus_stop : busname_to_bus_.at(bus_name)->bus_stops) {
@@ -103,17 +106,20 @@ namespace transport_catalogue {
 	const std::map<std::string_view, const Stop*>& TransportCatalogue::GetStopNameToStop() const {
 		return stopname_to_stop_;
 	}
+
 	const std::map<std::string_view, const Bus*>& TransportCatalogue::GetBusNameToBus() const {
 		return busname_to_bus_;
 	}
+
 	size_t TransportCatalogue::GetStopsCount() const {
 		return stops_.size();
 	}
+
 	const std::deque<Bus>& TransportCatalogue::GetBuses() const {
 		return buses_;
 	}
+
 	const std::deque<Stop>& TransportCatalogue::GetStops() const {
 		return stops_;
 	}
-
 } // transport_catalogue

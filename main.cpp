@@ -1,8 +1,7 @@
 #include "json_reader.h"
 #include "request_handler.h"
-#include "map_renderer.h"
 #include "json_builder.h"
-#include "transport_router.h"
+#include "serialization.h"
 
 #include <iostream>
 #include <filesystem>
@@ -24,56 +23,36 @@ int main(int argc, char* argv[]) {
         PrintUsage();
         return 1;
     }
-
     const std::string_view mode(argv[1]);
-
     if (mode == "make_base"sv) {
-        std::ifstream in("make_base.json"s);
-       
-        JsonReader json_reader(in);
-        Serialize(json_reader.GetRequests());
-
-        in.close();
-    }
-    else if (mode == "process_requests"sv) {
-        std::ifstream in("process_requests.json"s);
-        std::ofstream out("result.json"s);
+        JsonReader json_reader(cin);
         TransportCatalogue catalogue;
         MapRender map;
-        RequestHandler request_handler(catalogue, map);
-        JsonReader json_reader(in);
-        
-        json_reader.SetRequestHandler(request_handler);//new
-
-        std::optional<transport_catalogue_serialization::TransportCatalogue> t_k = Deserialize(json_reader.GetRequests());
+        json_reader.FillCatalogue(catalogue);
+        TransportRouter transport_router(catalogue);
+        json_reader.FillRouteSettings(transport_router);
+        json_reader.FillRenderSettings(map);
+        Serialize(json_reader.GetRequests().at("serialization_settings"s).AsMap().begin()->second.AsString(), catalogue, map, transport_router);
+    }else if (mode == "process_requests"sv) {
+        JsonReader json_reader(cin);       
+        std::optional<transport_catalogue_serialization::TransportCatalogue> t_k = Deserialize(json_reader.GetRequests().at("serialization_settings"s).AsMap().begin()->second.AsString());
         if (!t_k) {
             cerr << "wrong deserializetion" << endl;
             system("pause");
             return 0;
         }
-        transport_catalogue_serialization::BaseRequests base_requests_ser = t_k->base_requests();
-        json_reader.FillCatalogue(catalogue, base_requests_ser);
-        
-        transport_catalogue_serialization::RenderSettings render_settings_ser = t_k->render_settings();
-        json_reader.FillRenderSettings(map, render_settings_ser);
-        transport_catalogue_serialization::RoutingSettings routing_settings_ser = t_k->routing_settings();
-        TransportRouter transport_router(catalogue);
-        json_reader.FillRouteSettings(transport_router, routing_settings_ser);
-
+        TransportCatalogue catalogue = DeserializeTransportCatalogue(t_k->base_transport_catalogue());
+        MapRender map = DeserializeMapRender(t_k->render_settings());
+        TransportRouter transport_router = DeserializeTransportRouter(t_k->routing_settings(), catalogue);
+        transport_router.SetTransportCatalogue(catalogue);
+        RequestHandler request_handler(catalogue, map);
         transport_router.FillVertexes();
         transport_router.FillGraphWithRoutes();
-        graph::Router router(transport_router.GetGraph());
-        transport_router.SetRouter(router);
         request_handler.SetTransportRouter(transport_router);
         json_reader.SetTransportRouter(transport_router);
-
-        
-        json_reader.PrintRequestsAnswer(out);
-
-        in.close();
-        out.close();
-    }
-    else {
+        json_reader.SetRequestHandler(request_handler);
+        json_reader.PrintRequestsAnswer(cout);
+    }else {
         PrintUsage();
         return 1;
     }

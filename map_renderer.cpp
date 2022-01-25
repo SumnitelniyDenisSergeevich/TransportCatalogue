@@ -41,6 +41,43 @@ namespace renderer {
 		color_palette_ = color_palette;
 	}
 
+	double MapRender::GetWidth() const noexcept {
+		return width_;
+	}
+	double MapRender::GetHeight() const noexcept {
+		return height_;
+	}
+	double MapRender::GetPadding() const noexcept {
+		return padding_;
+	}
+	double MapRender::GetLineWidth() const noexcept {
+		return line_width_;
+	}
+	double MapRender::GetStopRadius() const noexcept {
+		return stop_radius_;
+	}
+	uint32_t MapRender::GetBusLableFontSize() const noexcept {
+		return bus_label_font_size_;
+	}
+	std::pair<double, double> MapRender::GetBusLableOffset() const noexcept {
+		return { bus_label_offset_[0],bus_label_offset_[1] };
+	}
+	uint32_t MapRender::GetStopLableFontSize() const noexcept {
+		return stop_label_font_size_;
+	}
+	std::pair<double, double> MapRender::GetStopLableOffset() const noexcept {
+		return { stop_label_offset_[0], stop_label_offset_[1] };
+	}
+	svg::Color MapRender::GetUnderLayerColor() const noexcept {
+		return underlayer_color_;
+	}
+	double MapRender::GetUnderLayerWidth() const noexcept {
+		return underlayer_width_;
+	}
+	const std::vector<svg::Color>& MapRender::GetColorPalette() const noexcept {
+		return color_palette_;
+	}
+
 	svg::Document MapRender::RenderSVG(const transport_catalogue::TransportCatalogue& db_) const {
 
 		auto stop_name_to_stop = db_.GetStopNameToStop();
@@ -81,107 +118,18 @@ namespace renderer {
 		else {
 			zoom_coef = 0.0;
 		}
-		//========================================================================рисуем линиии=======================================
+
+		ScaleSettings scale_settings;
+		scale_settings.zoom_coef = zoom_coef;
+		scale_settings.min_lat = min_lat;
+		scale_settings.max_lat = max_lat;
+		scale_settings.min_lon = min_lon;
+		scale_settings.max_lon = max_lon;
+
 		auto bus_name_to_bus = db_.GetBusNameToBus();
 
-		size_t i = 0;
-		for (auto& [bus_name, bus] : bus_name_to_bus) {
-			if (bus->bus_stops.size() != 0) {
-				svg::Polyline polyline;
-				vector<pair<double, double>> points;
-				polyline.SetStrokeColor(color_palette_.at(i)).SetFillColor("none"s).SetStrokeWidth(line_width_)
-					.SetStrokeLineCap(svg::StrokeLineCap::kRound).SetStrokeLineJoin(svg::StrokeLineJoin::kRound);
-				for (auto& stop : bus->bus_stops) {
-					double x = (stop->coordinates.lng - min_lon) * zoom_coef + padding_;
-					double y = (max_lat - stop->coordinates.lat) * zoom_coef + padding_;
-					polyline.AddPoint({ x,y });
-					if (!bus->circle_key) {
-						points.push_back({ x,y });
-					}
-				}
-				if (bus->circle_key) {
-					auto& stop = *(bus->bus_stops.begin());
-					double x = (stop->coordinates.lng - min_lon) * zoom_coef + padding_;
-					double y = (max_lat - stop->coordinates.lat) * zoom_coef + padding_;
-					polyline.AddPoint({ x,y });
-				}
-				else {
-					points.pop_back();
-					for (auto iter = points.rbegin(); iter != points.rend(); ++iter) {
-						polyline.AddPoint({ iter->first,iter->second });
-					}
-				}
-				result.Add(polyline);
-				i++;
-				if (i == color_palette_.size()) {
-					i = 0;
-				}
-			}
-		}
-
-
-		//========================================================================рисуем текст=======================================
-		i = 0;
-		for (auto& [bus_name, bus] : bus_name_to_bus) {
-			if (bus->bus_stops.size() != 0) {
-				if (bus->circle_key) {
-					svg::Text text;
-					svg::Text podlojka;
-					auto& stop = *(bus->bus_stops.begin());
-					double x = (stop->coordinates.lng - min_lon) * zoom_coef + padding_;
-					double y = (max_lat - stop->coordinates.lat) * zoom_coef + padding_;
-
-					text.SetPosition({ x,y }).SetData(bus->name).SetFillColor(color_palette_.at(i));
-					podlojka.SetPosition({ x,y }).SetData(bus->name);
-					DrawText(text, podlojka);
-
-					result.Add(podlojka);
-					result.Add(text);
-				}
-				else {
-					auto& stop_begin = *(bus->bus_stops.begin());
-					auto& stop_end = *(bus->bus_stops.end() - 1);
-					if (stop_begin == stop_end) {
-						svg::Text text;
-						svg::Text podlojka;
-						auto& stop = stop_begin;
-						double x = (stop->coordinates.lng - min_lon) * zoom_coef + padding_;
-						double y = (max_lat - stop->coordinates.lat) * zoom_coef + padding_;
-						text.SetPosition({ x,y }).SetData(bus->name).SetFillColor(color_palette_.at(i));
-						podlojka.SetPosition({ x,y }).SetData(bus->name);
-						DrawText(text, podlojka);
-
-						result.Add(podlojka);
-						result.Add(text);
-					}
-					else {
-						svg::Text text;
-						svg::Text podlojka;
-						double x = (stop_begin->coordinates.lng - min_lon) * zoom_coef + padding_;
-						double y = (max_lat - stop_begin->coordinates.lat) * zoom_coef + padding_;
-						text.SetPosition({ x,y }).SetData(bus->name).SetFillColor(color_palette_.at(i));
-						podlojka.SetPosition({ x,y }).SetData(bus->name);
-						DrawText(text, podlojka);
-
-						result.Add(podlojka);
-						result.Add(text);
-
-						x = (stop_end->coordinates.lng - min_lon) * zoom_coef + padding_;
-						y = (max_lat - stop_end->coordinates.lat) * zoom_coef + padding_;
-						text.SetPosition({ x,y });
-						podlojka.SetPosition({ x,y });
-
-						result.Add(podlojka);
-						result.Add(text);
-					}
-				}
-
-				i++;
-				if (i == color_palette_.size()) {
-					i = 0;
-				}
-			}
-		}
+		DrawLines(bus_name_to_bus, scale_settings, result);
+		DrawText(bus_name_to_bus, scale_settings, result);
 		//========================================================================рисуем символы остановок=======================================
 		for (auto& [stop_name, stop] : stop_name_to_stop) {
 			for (auto& [bus_name, bus] : bus_name_to_bus) {
@@ -225,12 +173,112 @@ namespace renderer {
 		return result;
 	}
 
-	void MapRender::DrawText(svg::Text& text, svg::Text& podlojka) const {
+	void MapRender::DrawLines(const std::map<std::string_view, const Bus*>& bus_name_to_bus, const ScaleSettings& scale_settings, svg::Document& result) const {
+		size_t i = 0;
+		for (auto& [bus_name, bus] : bus_name_to_bus) {
+			if (bus->bus_stops.size() != 0) {
+				svg::Polyline polyline;
+				vector<pair<double, double>> points;
+				polyline.SetStrokeColor(color_palette_.at(i)).SetFillColor("none"s).SetStrokeWidth(line_width_)
+					.SetStrokeLineCap(svg::StrokeLineCap::kRound).SetStrokeLineJoin(svg::StrokeLineJoin::kRound);
+				for (auto& stop : bus->bus_stops) {
+					double x = (stop->coordinates.lng - scale_settings.min_lon) * scale_settings.zoom_coef + padding_;
+					double y = (scale_settings.max_lat - stop->coordinates.lat) * scale_settings.zoom_coef + padding_;
+					polyline.AddPoint({ x,y });
+					if (!bus->circle_key) {
+						points.push_back({ x,y });
+					}
+				}
+				if (bus->circle_key) {
+					auto& stop = *(bus->bus_stops.begin());
+					double x = (stop->coordinates.lng - scale_settings.min_lon) * scale_settings.zoom_coef + padding_;
+					double y = (scale_settings.max_lat - stop->coordinates.lat) * scale_settings.zoom_coef + padding_;
+					polyline.AddPoint({ x,y });
+				}
+				else {
+					points.pop_back();
+					for (auto iter = points.rbegin(); iter != points.rend(); ++iter) {
+						polyline.AddPoint({ iter->first,iter->second });
+					}
+				}
+				result.Add(polyline);
+				i++;
+				if (i == color_palette_.size()) {
+					i = 0;
+				}
+			}
+		}
+	}
+
+	void MapRender::DrawText(const std::map<std::string_view, const Bus*>& bus_name_to_bus, const ScaleSettings& scale_settings, svg::Document& result) const {
+		size_t i = 0;
+		for (auto& [bus_name, bus] : bus_name_to_bus) {
+			if (bus->bus_stops.size() != 0) {
+				if (bus->circle_key) {
+					svg::Text text;
+					svg::Text podlojka;
+					auto& stop = *(bus->bus_stops.begin());
+					double x = (stop->coordinates.lng - scale_settings.min_lon) * scale_settings.zoom_coef + padding_;
+					double y = (scale_settings.max_lat - stop->coordinates.lat) * scale_settings.zoom_coef + padding_;
+
+					text.SetPosition({ x,y }).SetData(bus->name).SetFillColor(color_palette_.at(i));
+					podlojka.SetPosition({ x,y }).SetData(bus->name);
+					DrawTextObject(text, podlojka);
+
+					result.Add(podlojka);
+					result.Add(text);
+				}
+				else {
+					auto& stop_begin = *(bus->bus_stops.begin());
+					auto& stop_end = *(bus->bus_stops.end() - 1);
+					if (stop_begin == stop_end) {
+						svg::Text text;
+						svg::Text podlojka;
+						auto& stop = stop_begin;
+						double x = (stop->coordinates.lng - scale_settings.min_lon) * scale_settings.zoom_coef + padding_;
+						double y = (scale_settings.max_lat - stop->coordinates.lat) * scale_settings.zoom_coef + padding_;
+						text.SetPosition({ x,y }).SetData(bus->name).SetFillColor(color_palette_.at(i));
+						podlojka.SetPosition({ x,y }).SetData(bus->name);
+						DrawTextObject(text, podlojka);
+
+						result.Add(podlojka);
+						result.Add(text);
+					}
+					else {
+						svg::Text text;
+						svg::Text podlojka;
+						double x = (stop_begin->coordinates.lng - scale_settings.min_lon) * scale_settings.zoom_coef + padding_;
+						double y = (scale_settings.max_lat - stop_begin->coordinates.lat) * scale_settings.zoom_coef + padding_;
+						text.SetPosition({ x,y }).SetData(bus->name).SetFillColor(color_palette_.at(i));
+						podlojka.SetPosition({ x,y }).SetData(bus->name);
+						DrawTextObject(text, podlojka);
+
+						result.Add(podlojka);
+						result.Add(text);
+
+						x = (stop_end->coordinates.lng - scale_settings.min_lon) * scale_settings.zoom_coef + padding_;
+						y = (scale_settings.max_lat - stop_end->coordinates.lat) * scale_settings.zoom_coef + padding_;
+						text.SetPosition({ x,y });
+						podlojka.SetPosition({ x,y });
+
+						result.Add(podlojka);
+						result.Add(text);
+					}
+				}
+
+				i++;
+				if (i == color_palette_.size()) {
+					i = 0;
+				}
+			}
+		}
+	}
+
+	void MapRender::DrawTextObject(svg::Text& text, svg::Text& podlojka) const {
 		text.SetOffset({ bus_label_offset_[0],bus_label_offset_[1] }).SetFontSize(bus_label_font_size_);
 		text.SetFontFamily("Verdana"s).SetFontWeight("bold"s);
 		podlojka.SetOffset({ bus_label_offset_[0],bus_label_offset_[1] }).SetFontSize(bus_label_font_size_);
 		podlojka.SetFontFamily("Verdana"s).SetFontWeight("bold"s).SetFillColor(underlayer_color_).SetStrokeWidth(underlayer_width_);
 		podlojka.SetStrokeLineCap(svg::StrokeLineCap::kRound).SetStrokeLineJoin(svg::StrokeLineJoin::kRound).SetStrokeColor(underlayer_color_);
 	}
-
 }// renderer

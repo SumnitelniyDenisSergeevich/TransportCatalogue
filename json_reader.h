@@ -3,15 +3,13 @@
 #include "request_handler.h"
 #include "transport_router.h"
 #include "json.h"
-#include "serialization.h"
-
 
 class JsonReader {
 public:
 	JsonReader(std::istream& in);
-	void FillCatalogue(transport_catalogue::TransportCatalogue& tc, const transport_catalogue_serialization::BaseRequests& base_requests_ser) const;
-	void FillRenderSettings(renderer::MapRender& map, const transport_catalogue_serialization::RenderSettings& render_settings_ser) const;
-	void FillRouteSettings(TransportRouter&, const transport_catalogue_serialization::RoutingSettings& routing_settings_ser)const;
+	void FillCatalogue(transport_catalogue::TransportCatalogue& tc) const;
+	void FillRenderSettings(renderer::MapRender& map) const;
+	void FillRouteSettings(TransportRouter&)const;
 	void PrintRequestsAnswer(std::ostream& out) const;
 	void SetTransportRouter(const TransportRouter& t_router);
 	void SetRequestHandler(RequestHandler& rh);
@@ -26,16 +24,13 @@ private:
 	const TransportRouter* t_router_ = nullptr;
 };
 
-
 namespace transport_catalogue {
 	namespace transport_catalogue_input {
 		using namespace json;
-		void FillCatalog(TransportCatalogue& tc, const transport_catalogue_serialization::BaseRequests& base_requests_ser);
+		void FillCatalog(const Node& base_requests, TransportCatalogue& tc);
 		namespace detail {
-			Stop FillStop(const transport_catalogue_serialization::Stop& stop, 
-							const std::map<std::uint32_t, std::string>& id_stops_name_std,
-							std::unordered_map<std::string, std::unordered_map<std::string, int>>& from_to_dist);
-			std::pair<Bus, std::vector<std::string>> FillRoute(const transport_catalogue_serialization::Bus& bus, const std::map<uint32_t, std::string>& id_stops_name_std, TransportCatalogue& tc);
+			Stop FillStop(const Node& node_stop, std::unordered_map<std::string, Dict>& from_to_dist);
+			Bus FillRoute(Node& node_bus, TransportCatalogue& tc);
 		}
 	}
 }

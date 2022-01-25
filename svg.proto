@@ -2,24 +2,24 @@ syntax = "proto3";
 
 package transport_catalogue_serialization;
 
-message Rgb{
+message Rgb {
   uint32 red = 1;
   uint32 green = 2;
   uint32 blue = 3;
 }
 
-message Rgba{
+message Rgba {
   uint32 red = 1;
   uint32 green = 2;
   uint32 blue = 3;
   double opacity = 4;
 }
 
-message ColorString{
+message ColorString {
   string color = 1;
 }
 
-message Color{
+message Color {
   oneof class_color_variant{
     Rgb rgb_color =1;
     Rgba rgba_color =2;

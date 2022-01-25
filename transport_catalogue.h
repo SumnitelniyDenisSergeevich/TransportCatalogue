@@ -18,7 +18,7 @@ namespace transport_catalogue {
 	using DistFromTo = std::unordered_map<const Stop*, std::unordered_map<const Stop*, uint32_t, StopHasher>, StopHasher>;
 	class TransportCatalogue {
 	public:
-		void AddRoute(Bus& bus, const std::vector<std::string>& stops);
+		void AddRoute(Bus& bus);
 		void AddStop(const Stop& stop);
 
 		const Bus* FindRoute(const std::string& bus_name) const;
@@ -29,6 +29,7 @@ namespace transport_catalogue {
 		RouteInfo GetRouteInfo(const std::string& bus_name) const;
 		std::set<std::string_view> GetStopInfo(const Stop* stop) const;
 		double GetDistanceBetweenStops(const Stop* from, const Stop* to) const;
+		DistFromTo GetDistancesBetweenStops() const;
 		const std::map<std::string_view, const Stop*>& GetStopNameToStop() const;
 		const std::map<std::string_view, const Bus*>& GetBusNameToBus() const;
 		size_t GetStopsCount() const;

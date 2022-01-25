@@ -6,7 +6,7 @@ double TransportRouter::ComputeTravelTime(double distance) {
 
 void TransportRouter::FillVertexes() {
     size_t counter = 0;
-    for (const auto& stop : catalogue_.GetStops()) {
+    for (const auto& stop : catalogue_->GetStops()) {
         stop_id_[stop.name] = counter;
         id_stop_[counter] = stop.name;
         ++counter;
@@ -24,7 +24,7 @@ void TransportRouter::AddEdge(const Bus& bus, size_t from, size_t to, bool last_
 }
 
 void TransportRouter::FillGraphWithRoutes() {
-    const std::deque<Bus> buses = catalogue_.GetBuses();
+    const std::deque<Bus> buses = catalogue_->GetBuses();
     for (const Bus& bus : buses) {
         const std::vector<const Stop*> bus_stops = bus.bus_stops;
         for (size_t i = 0; i < bus_stops.size(); ++i) {
@@ -45,6 +45,8 @@ void TransportRouter::FillGraphWithRoutes() {
             }
         }
     }
+
+    router_ = new Router{ graph_ };
 }
 
 void TransportRouter::SetRouteSettings(const double velocity, const int bus_wait_time) {
@@ -52,12 +54,8 @@ void TransportRouter::SetRouteSettings(const double velocity, const int bus_wait
     route_settings_.bus_wait_time = bus_wait_time;
 }
 
-void TransportRouter::SetRouter(const Router<double>& router) {
-    router_ = &router;
-}
-
-const DirectedWeightedGraph<double>& TransportRouter::GetGraph() const {
-    return graph_;
+void TransportRouter::SetTransportCatalogue(const transport_catalogue::TransportCatalogue& catalogue) {
+    catalogue_ = &catalogue;
 }
 
 VertexId TransportRouter::GetVertexId(std::string_view stop)const {
@@ -76,6 +74,10 @@ size_t TransportRouter::GetBusWaitTime() const {
     return route_settings_.bus_wait_time;
 }
 
+double TransportRouter::GetBusVelocity() const {
+    return route_settings_.bus_velocity;
+}
+
 std::pair<double, size_t> TransportRouter::GetDistAndSpanCountBetweenStopsInRoute(const std::vector<const Stop*>& route_stops, const size_t from, const size_t to,
                                                           bool last_ring) const {
     auto station_from = route_stops.begin() + from;
@@ -85,23 +87,23 @@ std::pair<double, size_t> TransportRouter::GetDistAndSpanCountBetweenStopsInRout
 
     if (last_ring) {
         for (; station_from + 1 < route_stops.end(); ++station_from) {
-            dist += catalogue_.GetDistanceBetweenStops(*station_from, *next(station_from, 1));
+            dist += catalogue_->GetDistanceBetweenStops(*station_from, *next(station_from, 1));
             ++span_count;
         }
-        dist += catalogue_.GetDistanceBetweenStops(*station_from, *route_stops.begin());
+        dist += catalogue_->GetDistanceBetweenStops(*station_from, *route_stops.begin());
         ++span_count;
         return { dist / 1000.0, span_count };
     }
 
     if (station_from < station_to) {
         for (; station_from < station_to; ++station_from) {
-            dist += catalogue_.GetDistanceBetweenStops(*station_from, *next(station_from, 1));
+            dist += catalogue_->GetDistanceBetweenStops(*station_from, *next(station_from, 1));
             ++span_count;
         }
     }
     else if (station_from > station_to) {
         for (; station_from > station_to; --station_from) {
-            dist += catalogue_.GetDistanceBetweenStops(*station_from, *next(station_from, -1));
+            dist += catalogue_->GetDistanceBetweenStops(*station_from, *next(station_from, -1));
             ++span_count;
         }
     }
